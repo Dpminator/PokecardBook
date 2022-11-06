@@ -8,27 +8,28 @@ namespace Pokebook
 {
     public class PokemonBookPage
     {
-        private readonly CloudTable PokemonCardCellTable;
+        private readonly CloudTable PokecardSlotTable;
         private readonly CloudTable PokemonUserTable;
-        private readonly Dictionary<(string, string), PokemonCardCellEntity> PokemonCardCells;
-        private readonly string UserName;
+        private readonly Dictionary<(string, string), PokecardSlot> PokecardSlots;
+        private readonly string BookName;
         private readonly int PageCount;
 
-        public PokemonBookPage(CloudTable pokemonCardCellTable, CloudTable pokemonUserTable, string username)
+        public PokemonBookPage(CloudTable pokecardSlotTable, CloudTable pokecardBookTable, string bookName)
         {
-            PokemonCardCellTable = pokemonCardCellTable;
-            PokemonUserTable = pokemonUserTable;
-            PokemonCardCells = new Dictionary<(string, string), PokemonCardCellEntity>();
-            UserName = string.IsNullOrEmpty(username) ? "" : username.ToLower();
+            PokecardSlotTable = pokecardSlotTable;
+            PokemonUserTable = pokecardBookTable;
+            PokecardSlots = new Dictionary<(string, string), PokecardSlot>();
+            BookName = string.IsNullOrEmpty(bookName) ? "" : bookName;
             PageCount = 12;
 
-            var pokebookUsers = PokemonUserEntity.GetPokebookUser(PokemonUserTable, UserName).GetAwaiter().GetResult();
+            var pokebookUsers = PokecardBook.GetPokebookUser(PokemonUserTable, BookName).GetAwaiter().GetResult();
             if (pokebookUsers.Results.Count != 0)
             {
                 PageCount = int.Parse(pokebookUsers.Results[0].PageCount);
-                foreach (var cardCell in PokemonCardCellEntity.GetPokemonCardCells(PokemonCardCellTable, UserName).GetAwaiter().GetResult())
+                foreach (var cardSlot in PokecardSlot.GetPokecards(PokecardSlotTable, BookName).GetAwaiter().GetResult())
                 {
-                    PokemonCardCells.Add((cardCell.PartitionKey, cardCell.RowKey), cardCell);
+                    var rowKeySplit = cardSlot.RowKey.Split("-");
+                    PokecardSlots.Add((rowKeySplit[0], rowKeySplit[1]), cardSlot);
                 }
             }
         }
@@ -46,9 +47,9 @@ namespace Pokebook
 
         private async Task<string> GetPokemonBookHtml()
         {
-            var newUser = UserName == "";
+            var newBook = BookName == "";
 
-            var content = $"<script>username = \"{UserName}\"; pageCount = {PageCount};</script>";
+            var content = $"<script>bookName = \"{BookName}\"; pageCount = {PageCount};</script>";
 
             content += "<div style='float:left;width:300;'>";
 
@@ -60,9 +61,9 @@ namespace Pokebook
             content += "</div><br><br><br>";
 
             content += "<div>";
-            content += "<h3>User Details:</h3>";
-            content += $"Username: <input id='UsernameInput' style='width:150;' onkeyup=\"UserDetailSelectorOnChange()\" {(newUser ? "" : "disabled")} value='{(newUser ? "" : UserName)}'><br>";
-            content += $"Page Count: <input id='PageCountInput' style='width:140;' onkeyup=\"UserDetailSelectorOnChange()\" onChange=\"UserDetailSelectorOnChange()\" type='number' min='2' max='100' value='{(newUser ? "12" : $"{PageCount}")}'><br>";
+            content += "<h3>Book Details:</h3>";
+            content += $"Book Name: <input id='BookNameInput' style='width:150;' onkeyup=\"BookDetailSelectorOnChange()\" {(newBook ? "" : "disabled")} value='{(newBook ? "" : BookName)}'><br>";
+            content += $"Page Count: <input id='PageCountInput' style='width:140;' onkeyup=\"BookDetailSelectorOnChange()\" onChange=\"BookDetailSelectorOnChange()\" type='number' min='2' max='100' value='{(newBook ? "12" : $"{PageCount}")}'><br>";
             content += "</div><br><br><br>";
 
             content += "<div>";
@@ -119,10 +120,10 @@ namespace Pokebook
                         var set = "NONE";
                         var cardNumber = "0";
 
-                        if (page != PageCount + 1 && PokemonCardCells.ContainsKey(pageSlot))
+                        if (page != PageCount + 1 && PokecardSlots.ContainsKey(pageSlot))
                         {
-                            set = PokemonCardCells[pageSlot].SetName;
-                            cardNumber = PokemonCardCells[pageSlot].CardNumber;
+                            set = PokecardSlots[pageSlot].SetName;
+                            cardNumber = PokecardSlots[pageSlot].CardNumber;
                         }
 
                         var url = $"/api/card-image/{set}/{cardNumber.Replace("/", "-")}";

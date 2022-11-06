@@ -1,13 +1,9 @@
-using System;
-using System.IO;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.AspNetCore.Http;
 using System.Net.Http;
-using Microsoft.Azure.WebJobs.Host;
-using Microsoft.Extensions.Logging;
 using Microsoft.Azure.Cosmos.Table;
 
 namespace Pokebook
@@ -19,7 +15,7 @@ namespace Pokebook
             [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "card-image/{set}/{number}")] HttpRequest req, Microsoft.Azure.WebJobs.ExecutionContext exeCon,
             string set, string number)
         {
-            var url = PokemonCardCellEntity.GetPokecardImageUrl(set, number);
+            var url = PokecardSlot.GetPokecardImageUrl(set, number);
             var backupUrl = "https://www.mypokecard.com/en/Gallery/my/galery/5c4Z3OUCKurc.jpg";
 
             var imageResponse = await new HttpClient().GetAsync(url);
@@ -31,9 +27,9 @@ namespace Pokebook
         [FunctionName("PokemonBook")]
         public static async Task<ContentResult> ProducePokemonBookHtmlPage(
             [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "pokemon-book")] HttpRequest req,
-            [Table("PokemonBook")] CloudTable pokemonBook, [Table("PokemonBookUser")] CloudTable pokemonBookUser)
+            [Table("PokecardSlot")] CloudTable pokecardSlotTable, [Table("PokecardBook")] CloudTable pokecardBookTable)
         {
-            var htmlHelper = new PokemonBookPage(pokemonBook, pokemonBookUser, req.Query["username"].ToString().ToLower());
+            var htmlHelper = new PokemonBookPage(pokecardSlotTable, pokecardBookTable, req.Query["book"].ToString());
             var pageContent = await htmlHelper.GetHtml();
             return new ContentResult { Content = pageContent, ContentType = "text/html" };
         }
@@ -41,25 +37,25 @@ namespace Pokebook
         [FunctionName("UpdateBook")]
         public static async Task<ContentResult> UpdateBook(
            [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "update-book")] HttpRequest req, Microsoft.Azure.WebJobs.ExecutionContext exeCon,
-            [Table("PokemonBook")] CloudTable pokemonBook, [Table("PokemonBookUser")] CloudTable pokemonBookUser)
+            [Table("PokecardSlot")] CloudTable pokecardSlotTable, [Table("PokecardBook")] CloudTable pokecardBookTable)
         {
-            var username = req.Query["username"].ToString().ToLower();
+            var bookName = req.Query["book"].ToString(); 
             var listOfUpdates = req.Query["updates"].ToString().TrimEnd(',');
-            await PokemonCardCellEntity.InjectUpdates(pokemonBook, listOfUpdates, username);
+            await PokecardSlot.InjectUpdates(pokecardSlotTable, listOfUpdates, bookName);
 
             var newPageCount = req.Query["pages"].ToString();
             if (newPageCount != "")
             {
-                await pokemonBookUser.ExecuteAsync(TableOperation.InsertOrMerge(new PokemonUserEntity
+                await pokecardBookTable.ExecuteAsync(TableOperation.InsertOrMerge(new PokecardBook
                 {
                     ETag = "*",
-                    PartitionKey = username,
-                    RowKey = username,
+                    PartitionKey = bookName,
+                    RowKey = bookName,
                     PageCount = newPageCount
                 }));
             }
 
-            var html = $"<!DOCTYPE html><html><head><meta http-equiv=\"refresh\" content=\"0; url=http{(req.IsHttps ? "s" : "")}://{req.Host.Value}/api/pokemon-book?username={username}\"/></head></html>";
+            var html = $"<!DOCTYPE html><html><head><meta http-equiv=\"refresh\" content=\"0; url=http{(req.IsHttps ? "s" : "")}://{req.Host.Value}/api/pokemon-book?book={bookName}\"/></head></html>";
             return new ContentResult { Content = html, ContentType = "text/html" };
         }
     }

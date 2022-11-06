@@ -16,37 +16,38 @@ namespace Pokebook
             TableQuery.GenerateFilterCondition("RowKey", QueryComparisons.Equal, rowKey);
     }
 
-    public class PokemonCardCellEntity : CustomTableEntity
+    public class PokecardSlot : CustomTableEntity
     {
         public string SetName { get; set; }
         public string CardNumber { get; set; }
-        public string UserName { get; set; }
 
+        public string GetBookName() => PartitionKey;
 
-        public static async Task<TableQuerySegment<PokemonCardCellEntity>> GetPokemonCardCells(CloudTable pokeTable, string username)
+        public int GetPageNumber() => int.Parse(RowKey.Split('-')[0]);
+        public int GetSlotNumber() => int.Parse(RowKey.Split('-')[1]);
+
+        public static async Task<TableQuerySegment<PokecardSlot>> GetPokecards(CloudTable pokecardSlotTable, string bookName)
         {
-            var query = new TableQuery<PokemonCardCellEntity>()
-                .Where(TableQuery.GenerateFilterCondition("UserName", QueryComparisons.Equal, username.ToLower()));
-            return await pokeTable.ExecuteQuerySegmentedAsync(query, null);
+            var query = new TableQuery<PokecardSlot>().Where(GetPartitionKeyFilter(bookName));
+            return await pokecardSlotTable.ExecuteQuerySegmentedAsync(query, null);
         }
 
-        public static async Task InjectUpdates(CloudTable pokeTable, string commaSeparatedUpdates, string username)
+        public static async Task InjectUpdates(CloudTable pokecardSlotTable, string commaSeparatedUpdates, string bookName)
         {
             if (commaSeparatedUpdates == "") return;
             foreach (var change in commaSeparatedUpdates.Split(","))
             {
                 var changeSplit = change.Split("_");
-                var card = new PokemonCardCellEntity
+                var card = new PokecardSlot
                 {
                     ETag = "*",
-                    PartitionKey = changeSplit[0],
-                    RowKey = changeSplit[1],
+                    PartitionKey = bookName,
+                    RowKey = $"{changeSplit[0]}-{changeSplit[1]}",
                     SetName = changeSplit[2],
-                    CardNumber = changeSplit[3],
-                    UserName = username
+                    CardNumber = changeSplit[3]
                 };
                 card.BeautifySetName();
-                await pokeTable.ExecuteAsync(card.SetName == "NONE" ? TableOperation.Delete(card) : TableOperation.InsertOrMerge(card));
+                await pokecardSlotTable.ExecuteAsync(card.SetName == "NONE" ? TableOperation.Delete(card) : TableOperation.InsertOrMerge(card));
             }
         }
 
@@ -142,15 +143,16 @@ namespace Pokebook
         }
     }
 
-    public class PokemonUserEntity : CustomTableEntity
+    public class PokecardBook : CustomTableEntity
     {
         public string PageCount { get; set; }
 
-        public static async Task<TableQuerySegment<PokemonUserEntity>> GetPokebookUser(CloudTable pokeTable, string username)
+        public string BookName => PartitionKey;
+
+        public static async Task<TableQuerySegment<PokecardBook>> GetPokebookUser(CloudTable pokecardBookTable, string bookName)
         {
-            var query = new TableQuery<PokemonUserEntity>().Where(GetPartitionKeyFilter(username));
-            return await pokeTable.ExecuteQuerySegmentedAsync(query, null);
+            var query = new TableQuery<PokecardBook>().Where(GetPartitionKeyFilter(bookName));
+            return await pokecardBookTable.ExecuteQuerySegmentedAsync(query, null);
         }
     }
-
 }

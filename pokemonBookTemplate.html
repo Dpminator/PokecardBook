@@ -54,23 +54,24 @@
             var selectedSetName = "NONE"
             var selectedCardNumber = ""
             var listOfChanges = ""
-            var username = ""
+            var bookName = ""
             var pageCount = 12
 
             function SaveUpdates()
             {
-                username = document.getElementById("UsernameInput").value
+                var newBook = bookName == ""
+                bookName = document.getElementById("BookNameInput").value
                 var newPageCount = parseInt(document.getElementById("PageCountInput").value)
                 if (newPageCount % 2 == 1) newPageCount+= 1
-                var pageCountChange = newPageCount != pageCount ? ("&pages=" + newPageCount) : ""
-                var url = '/api/update-book?updates=' + listOfChanges + '&username=' + username + pageCountChange
+                var pageCountChange = newPageCount != pageCount || newBook ? ("&pages=" + newPageCount) : ""
+                var url = '/api/update-book?updates=' + listOfChanges + '&book=' + bookName + pageCountChange
                 window.location.href = url;
             }
 
             function UndoAllUpdates()
             {
-                var usernamePart = username == "" ? "" : "?username=" + username
-                var url = '/api/pokemon-book' + usernamePart
+                var bookPart = bookName == "" ? "" : "?book=" + bookName
+                var url = '/api/pokemon-book' + bookPart
                 window.location.href = url;
             }
 
@@ -97,19 +98,19 @@
                 li.innerHTML = selectedPage + '-' + selectedSlot + ': ' + chosenSetName + " - " + chosenCardNumber
                 document.getElementById("UpdatedCardsList").appendChild(li)
 
-                document.getElementById("SaveUpdates").disabled = document.getElementById("UsernameInput").value == "" ||
+                document.getElementById("SaveUpdates").disabled = document.getElementById("BookNameInput").value == "" ||
                     document.getElementById("PageCountInput").value < 2 || document.getElementById("PageCountInput").value > 100
                 document.getElementById("UndoUpdates").disabled = false
             }
 
-            function UserDetailSelectorOnChange()
+        function BookDetailSelectorOnChange()
             {
                 var buttonActive =
-                    document.getElementById("UsernameInput").value != "" &&
+                    document.getElementById("BookNameInput").value != "" &&
                     document.getElementById("PageCountInput").value >= 2 &&
                     document.getElementById("PageCountInput").value <= 100 &&
                     (
-                        document.getElementById("UsernameInput").value != username ||
+                        document.getElementById("BookNameInput").value != bookName ||
                         document.getElementById("PageCountInput").value != pageCount ||
                         listOfChanges != ""
                     )
