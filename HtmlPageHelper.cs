@@ -59,13 +59,13 @@ namespace Pokebook
             content += "<button id='PageNextButton' onclick=\"MovePage('next')\">Next</button>";
             content += "</div><br><br><br>";
 
-            content += "<div>";
+            content += "<div class ='Boxdesign'>";
             content += "<h3>Book Details:</h3>";
             content += $"Book Name: <input id='BookNameInput' style='width:150;' onkeyup=\"BookDetailSelectorOnChange()\" {(BookName == "" ? "" : "disabled")} value='{BookName}'><br>";
             content += $"Page Count: <input id='PageCountInput' style='width:140;' onkeyup=\"BookDetailSelectorOnChange()\" onChange=\"BookDetailSelectorOnChange()\" type='number' min='2' max='100' value='{(NewBookFromUrl ? "" :$"{PageCount}")}'><br>";
             content += "</div><br><br><br>";
 
-            content += "<div>";
+            content += "<div class ='Boxdesign'>";
             content += "<h3>Selected Card:</h3>";
             content += "Page Number: <input id='SelectedPageNumber' style='width:124;' disabled value='N/A'><br>";
             content += "Slot Number: <input id='SelectedSlotNumber' style='width:129;' disabled value='N/A'><br>";
@@ -91,16 +91,15 @@ namespace Pokebook
             content += "<option value='Crown Zenith'>Crown Zenith</option>";
             content += "</select><br>";
             content += "Card Number: <input id='CardNumberInput' onkeyup=\"SelectorOnChange()\" style='width:125;' disabled><br>";
-            content += "<button id='ClearSelection' onclick='ClearSelection()' disabled>Clear Selection</button><br><br>";
-            content += "<button id='UpdateCard' onclick='UpdateCard()' disabled>Update Card</button><br><br>";
-            content += "<button id='SwapCard' onclick='SwapCardButton()' disabled>Swap Card</button><br><br>";
+            content += "<button class ='buttonlayout' id='ClearSelection' onclick='ClearSelection()' disabled>Clear Selection</button>";
+            content += "<button class ='buttonlayout' id='UpdateCard' onclick='UpdateCard()' disabled>Update Card</button>";
             content += "</div><br><br><br>";
 
-            content += "<div>";
+            content += "<div class ='Boxdesign'>";
             content += "<h3>Updated Cards:</h3>";
             content += "<ul id='UpdatedCardsList'></ul><br>";
-            content += "<button id='UndoUpdates' onclick='UndoAllUpdates()' disabled>Undo All Updates</button><br><br>";
-            content += "<button id='SaveUpdates' onclick='SaveUpdates()' disabled>Save Updates</button><br><br>";
+            content += "<button class ='buttonlayout' id='UndoUpdates' onclick='UndoAllUpdates()' disabled>Undo All Updates</button><br><br>";
+            content += "<button class ='buttonlayout' id='SaveUpdates' onclick='SaveUpdates()' disabled>Save Updates</button><br><br>";
             content += "</div><br><br><br>";
 
             content += "</div>";
@@ -109,7 +108,7 @@ namespace Pokebook
             content += "<div style='float:left'>";
             for (int page = 0; page <= PageCount + 1; page++)
             {
-                content += $"<div class='PokemonCardPage' id='PokemonCardPage{page}' style='display:inline-block;{(page == 0 || page == PageCount + 1 ? "opacity:0.3" : "")}'><table>";
+                content += $"<div class='PokemonCardPage' id='PokemonCardPage{page}' style='display:inline-block;{(page == 0 || page == PageCount + 1 ? "opacity:0.3" : "")}'><table >";
                 for (int row = 0; row < 3; row++)
                 {
                     content += "<tr>";
@@ -128,13 +127,15 @@ namespace Pokebook
 
                         var url = $"/api/card-image/{set}/{cardNumber.Replace("/", "-")}";
                         var clickAction = page == 0 || page == PageCount + 1 ? "" : $"onclick=\"SelectCard({page}, {slot}, '{set.Replace("'", "\\'")}', '{cardNumber}')\"";
-                        content += $"<td><div class='PokemonCardCell' id='Cell_{page}_{slot}' style='background-image:url(\"{url.Replace("'", "&#39;")}\")' {clickAction}></div></td>";
+                        content += $"<td><img class='PokemonCardCell' id='Cell_{page}_{slot}' src=\"{url.Replace("'", "&#39;")}\" {clickAction}></td>";
                     }
                     content += "</tr>";
                 }
                 content += "</table></div>";
             }
             content += "</div>";
+
+
 
             return content;
         }

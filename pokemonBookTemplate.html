@@ -2,6 +2,9 @@
 <head>
     <title>Pokemon Cards Book</title>
     <style>
+        @import url('https://rsms.me/inter/inter.css');
+
+
         table, th, tr, td {
             border: 1px solid black;
         }
@@ -14,6 +17,27 @@
             white-space: nowrap;
         }
 
+        td img:hover {
+            transform: translateY(-10px);
+            -webkit-mask: linear-gradient(-70deg,#000 40%,#0005,#000 60%) right/300%;
+            animation: shimmer 0.8s;
+        }
+
+        @keyframes shimmer {
+            100% {
+                -webkit-mask-position: left
+            }
+        }
+
+        .Boxdesign h3 {
+            font-family: "Inter";
+            position: relative;
+            top: -25px;
+            background-color: white;
+            width:fit-content;
+            height:fit-content;
+        }
+
         h3, h4 {
             margin: 2;
         }
@@ -23,19 +47,19 @@
         }
 
         #SelectedCard {
+            transform: translateY(10px);
             position: fixed;
             z-index: 2;
-            width: 179px;
-            height: 250px;
+            width: 183px;
+            height: 255px;
             visibility: hidden;
-            border: 7px solid;
+            border: 5px solid;
             border-color: green;
         }
 
         .PokemonCardCell {
             width: 179px;
             height: 250px;
-            background-size: contain;
         }
 
         .PokemonCardPage {
@@ -43,282 +67,261 @@
             float: left;
         }
 
-        .PokemonCardPage > table {
-            border: 4px solid black;
+    .PokemonCardPage > table {
+        border: 4px solid black;
+    }
+
+        .Boxdesign {
+            border: 2px solid #212121;
+            border-radius: 4px;
+            box-shadow: .4rem .4rem 0 rgb(55,55,55) ;
+            padding: 10px;
+            margin: 10px;
         }
+
+
+
+        .buttonlayout {
+            display: inline-flex;
+            margin: 7px;
+            border-radius: 4px;
+            border: none;
+            box-shadow: 0 .2rem 0 rgb(230 230 230);
+            font-family: "Inter";
+        }
+
+
     </style>
     <script type="text/javascript" language="javascript">
-        var pageSection = 0
-        var selectedPage = 0
-        var selectedSlot = 0
-        var selectedSetName = "NONE"
-        var selectedCardNumber = ""
-        var listOfChanges = ""
-        var bookName = ""
-        var pageCount = 12
-        var swapCardMode = false
+            var pageSection = 0
+            var selectedPage = 0
+            var selectedSlot = 0
+            var selectedSetName = "NONE"
+            var selectedCardNumber = ""
+            var listOfChanges = ""
+            var bookName = ""
+            var pageCount = 12
 
-        function SaveUpdates()
-        {
-            var newBook = bookName == ""
-            bookName = document.getElementById("BookNameInput").value
-            var newPageCount = parseInt(document.getElementById("PageCountInput").value)
-            if (newPageCount % 2 == 1) newPageCount+= 1
-            var pageCountChange = newPageCount != pageCount || newBook ? ("&pages=" + newPageCount) : ""
-            var url = '/api/update-book?updates=' + listOfChanges + '&book=' + bookName + pageCountChange
-            window.location.href = url;
-        }
+            function SaveUpdates()
+            {
+                var newBook = bookName == ""
+                bookName = document.getElementById("BookNameInput").value
+                var newPageCount = parseInt(document.getElementById("PageCountInput").value)
+                if (newPageCount % 2 == 1) newPageCount+= 1
+                var pageCountChange = newPageCount != pageCount || newBook ? ("&pages=" + newPageCount) : ""
+                var url = '/api/update-book?updates=' + listOfChanges + '&book=' + bookName + pageCountChange
+                window.location.href = url;
+            }
 
-        function UndoAllUpdates()
-        {
-            var bookPart = bookName == "" ? "" : "?book=" + bookName
-            var url = '/api/pokemon-book' + bookPart
-            window.location.href = url;
-        }
+            function UndoAllUpdates()
+            {
+                var bookPart = bookName == "" ? "" : "?book=" + bookName
+                var url = '/api/pokemon-book' + bookPart
+                window.location.href = url;
+            }
 
-        function SelectionClick()
-        {
-            if (document.getElementById("SelectedCard").style.borderColor == "green") ClearSelection()
-        }
+            function SelectionClick()
+            {
+                if (document.getElementById("SelectedCard").style.borderColor == "green") ClearSelection()
+            }
 
-        function UpdateCard()
-        {
-            var chosenSetName = document.getElementById("SetNameSelector").value
-            var chosenCardNumber = document.getElementById("CardNumberInput").value
-            selectedSetName = chosenSetName
-            selectedCardNumber = chosenCardNumber
-            if (chosenCardNumber == "") chosenCardNumber = "0"
-            if (chosenSetName == "") chosenSetName = "NONE"
-            var cardImageUrl = '/api/card-image/' + chosenSetName + "/" + chosenCardNumber.replace("/", "-")
+            async function UpdateCard()
+            {
+                var chosenSetName = document.getElementById("SetNameSelector").value
+                var chosenCardNumber = document.getElementById("CardNumberInput").value
+                if (chosenCardNumber == "") chosenCardNumber = "0"
+                if (chosenSetName == "") chosenSetName = "NONE"
+                var cardImageUrl = '/api/card-image/' + chosenSetName + "/" + chosenCardNumber.replace("/", "-")
 
-            document.getElementById("SelectedCard").style.borderColor = "green"
-            document.getElementById("UpdateCard").disabled = true
-            document.getElementById("Cell_" + selectedPage + "_" + selectedSlot).style.backgroundImage = "url(\"" + cardImageUrl + "\")"
+                document.getElementById("SelectedCard").style.borderColor = "green"
+                document.getElementById("UpdateCard").disabled = true
+                document.getElementById("Cell_" + selectedPage + "_" + selectedSlot).style.backgroundImage = "url(\"" + cardImageUrl + "\")"
 
-            var update = selectedPage + '_' + selectedSlot + '_' + chosenSetName.toLowerCase().replace(" ", "-").replace(" ", "-").replace("'", "") + "_" + chosenCardNumber + ","
-            listOfChanges += update
-            var li = document.createElement("li")
-            li.innerHTML = selectedPage + '-' + selectedSlot + ': ' + chosenSetName + " - " + chosenCardNumber
-            document.getElementById("UpdatedCardsList").appendChild(li)
+                var update = selectedPage + '_' + selectedSlot + '_' + chosenSetName.toLowerCase().replace(" ", "-").replace(" ", "-").replace("'", "") + "_" + chosenCardNumber + ","
+                listOfChanges += update
+                var li = document.createElement("li")
+                li.innerHTML = selectedPage + '-' + selectedSlot + ': ' + chosenSetName + " - " + chosenCardNumber
+                document.getElementById("UpdatedCardsList").appendChild(li)
 
-            document.getElementById("SaveUpdates").disabled = document.getElementById("BookNameInput").value == "" ||
-                document.getElementById("PageCountInput").value < 2 || document.getElementById("PageCountInput").value > 100
-            document.getElementById("UndoUpdates").disabled = false
-        }
+                document.getElementById("SaveUpdates").disabled = document.getElementById("BookNameInput").value == "" ||
+                    document.getElementById("PageCountInput").value < 2 || document.getElementById("PageCountInput").value > 100
+                document.getElementById("UndoUpdates").disabled = false
+            }
 
         function BookDetailSelectorOnChange()
-        {
-            var buttonActive =
-                document.getElementById("BookNameInput").value != "" &&
-                document.getElementById("PageCountInput").value >= 2 &&
-                document.getElementById("PageCountInput").value <= 100 &&
-                (
-                    document.getElementById("BookNameInput").value != bookName ||
-                    document.getElementById("PageCountInput").value != pageCount ||
-                    listOfChanges != ""
-                )
-            document.getElementById("SaveUpdates").disabled = !buttonActive
-        }
-
-        function SelectorOnChange()
-        {
-            if (document.getElementById("SetNameSelector").value == 'NONE')
             {
-                document.getElementById("CardNumberInput").disabled = true
-                document.getElementById("CardNumberInput").value = ''
-            } else
-            {
-                document.getElementById("CardNumberInput").disabled = false
+                var buttonActive =
+                    document.getElementById("BookNameInput").value != "" &&
+                    document.getElementById("PageCountInput").value >= 2 &&
+                    document.getElementById("PageCountInput").value <= 100 &&
+                    (
+                        document.getElementById("BookNameInput").value != bookName ||
+                        document.getElementById("PageCountInput").value != pageCount ||
+                        listOfChanges != ""
+                    )
+                document.getElementById("SaveUpdates").disabled = !buttonActive
             }
 
-            document.getElementById("UpdateCard").disabled =
-                (document.getElementById("SetNameSelector").value == selectedSetName && document.getElementById("CardNumberInput").value == selectedCardNumber)
-
-            document.getElementById("SelectedCard").style.borderColor = document.getElementById("UpdateCard").disabled ? "green" : "coral"
-        }
-
-        function BeautifySetName(setName)
-        {
-            switch(setName)
+            function SelectorOnChange()
             {
-                case 'promo': return "Promo";
-                case 'sword-and-shield': return "Sword and Shield";
-                case 'rebel-clash': return "Rebel Clash";
-                case 'darkness-ablaze': return "Darkness Ablaze";
-                case 'champions-path': return "Champion's Path";
-                case 'vivid-voltage': return "Vivid Voltage";
-                case 'shining-fates': return "Shining Fates";
-                case 'battle-styles': return "Battle Styles";
-                case 'chilling-reign': return "Chilling Reign";
-                case 'evolving-skies': return "Evolving Skies";
-                case 'celebrations': return "Celebrations";
-                case 'celebrations-classic': return "Celebrations Classic";
-                case 'fusion-strike': return "Fusion Strike";
-                case 'brilliant-stars': return "Brilliant Stars";
-                case 'astral-radiance': return "Astral Radiance";
-                case 'lost-origin': return "Lost Origin";
-                case 'silver-tempest': return "Silver Tempest";
-                case 'crown-zenith': return "Crown Zenith";
-                default: return "";
-            };
-        }
-
-        function SelectCard(page, slot, setName, cardNumber)
-        {
-            if (document.getElementById("SelectedCard").style.borderColor != "green")
-            {
-                alert("You have changes on your current card! Either press 'Clear Selection' to discard changes or 'Update Card' to save changes...");
-                return
-            }
-
-            if (listOfChanges != "")
-            {
-                listOfChanges.split(",").forEach(checkChange);
-                function checkChange(change)
+                if (document.getElementById("SetNameSelector").value == 'NONE')
                 {
-                    if (change == "") return
+                    document.getElementById("CardNumberInput").disabled = true
+                    document.getElementById("CardNumberInput").value = ''
+                } else
+                {
+                    document.getElementById("CardNumberInput").disabled = false
+                }
 
-                    if (change.startsWith(page + "_" + slot + "_"))
+                document.getElementById("UpdateCard").disabled =
+                    (document.getElementById("SetNameSelector").value == selectedSetName && document.getElementById("CardNumberInput").value == selectedCardNumber)
+
+                document.getElementById("SelectedCard").style.borderColor = document.getElementById("UpdateCard").disabled ? "green" : "coral"
+            }
+
+            function BeautifySetName(setName)
+            {
+                switch(setName)
+                {
+                    case 'promo': return "Promo";
+                    case 'sword-and-shield': return "Sword and Shield";
+                    case 'rebel-clash': return "Rebel Clash";
+                    case 'darkness-ablaze': return "Darkness Ablaze";
+                    case 'champions-path': return "Champion's Path";
+                    case 'vivid-voltage': return "Vivid Voltage";
+                    case 'shining-fates': return "Shining Fates";
+                    case 'battle-styles': return "Battle Styles";
+                    case 'chilling-reign': return "Chilling Reign";
+                    case 'evolving-skies': return "Evolving Skies";
+                    case 'celebrations': return "Celebrations";
+                    case 'celebrations-classic': return "Celebrations Classic";
+                    case 'fusion-strike': return "Fusion Strike";
+                    case 'brilliant-stars': return "Brilliant Stars";
+                    case 'astral-radiance': return "Astral Radiance";
+                    case 'lost-origin': return "Lost Origin";
+                    case 'silver-tempest': return "Silver Tempest";
+                    case 'crown-zenith': return "Crown Zenith";
+                    default: return "";
+                };
+            }
+
+            function SelectCard(page, slot, setName, cardNumber)
+            {
+                if (document.getElementById("SelectedCard").style.borderColor != "green")
+                {
+                    alert("You have changes on your current card! Either press 'Clear Selection' to discard changes or 'Update Card' to save changes...");
+                    return
+                }
+
+                if (listOfChanges != "")
+                {
+                    listOfChanges.split(",").forEach(checkChange);
+                    function checkChange(change)
                     {
-                        var changeSplit = change.split("_")
-                        setName = BeautifySetName(changeSplit[2])
-                        cardNumber = changeSplit[3]
+                        if (change == "") return
+
+                        if (change.startsWith(page + "_" + slot + "_"))
+                        {
+                            var changeSplit = change.split("_")
+                            setName = BeautifySetName(changeSplit[2])
+                            cardNumber = changeSplit[3]
+                        }
                     }
                 }
+
+                selectedPage = page;
+                selectedSlot = slot;
+                selectedSetName = setName;
+                selectedCardNumber = (cardNumber == "0" ? "" : cardNumber);
+
+                document.getElementById("SelectedPageNumber").value = selectedPage
+                document.getElementById("SelectedSlotNumber").value = selectedSlot
+                document.getElementById("SetNameSelector").value = selectedSetName
+                document.getElementById("CardNumberInput").value = selectedCardNumber
+                document.getElementById("SetNameSelector").disabled = false
+                document.getElementById("CardNumberInput").disabled = (setName == 'NONE')
+                document.getElementById("ClearSelection").disabled = false
+                document.getElementById("UpdateCard").disabled = true
+                document.getElementById("SelectedCard").style.left = document.getElementById("Cell_" + selectedPage + "_" + selectedSlot).getBoundingClientRect().left - 7
+                document.getElementById("SelectedCard").style.top = document.getElementById("Cell_" + selectedPage + "_" + selectedSlot).getBoundingClientRect().top - 7
+                document.getElementById("SelectedCard").style.visibility = "visible"
+                document.getElementById("SelectedCard").style.borderColor = "green"
             }
 
-            if (swapCardMode && selectedSlot != "0")
+            function ClearSelection()
             {
-                var swapSetName = selectedSetName
-                var swapCardNumber = selectedCardNumber
-
-                document.getElementById("SetNameSelector").value = setName
-                document.getElementById("CardNumberInput").value = cardNumber
-                UpdateCard()
-
-                selectedPage = page
-                selectedSlot = slot
-                setName = swapSetName
-                cardNumber = swapCardNumber
-                document.getElementById("SetNameSelector").value = swapSetName
-                document.getElementById("CardNumberInput").value = swapCardNumber
-                UpdateCard()
-
-                ClearSelection()
+                selectedPage = 0;
+                selectedSlot = 0;
+                selectedSetName = "NONE";
+                selectedCardNumber = "";
+                document.getElementById("SelectedPageNumber").value = 'N/A'
+                document.getElementById("SelectedSlotNumber").value = 'N/A'
+                document.getElementById("SetNameSelector").value = 'NONE'
+                document.getElementById("CardNumberInput").value = ''
+                document.getElementById("SetNameSelector").disabled = true
+                document.getElementById("CardNumberInput").disabled = true
+                document.getElementById("ClearSelection").disabled = true
+                document.getElementById("UpdateCard").disabled = true
+                document.getElementById("SelectedCard").style.visibility = "hidden"
+                document.getElementById("SelectedCard").style.borderColor = "green"
             }
 
-            selectedPage = page;
-            selectedSlot = slot;
-            selectedSetName = setName;
-            selectedCardNumber = (cardNumber == "0" ? "" : cardNumber);
-
-            document.getElementById("SelectedPageNumber").value = selectedPage
-            document.getElementById("SelectedSlotNumber").value = selectedSlot
-            document.getElementById("SetNameSelector").value = selectedSetName
-            document.getElementById("CardNumberInput").value = selectedCardNumber
-            document.getElementById("SetNameSelector").disabled = false
-            document.getElementById("CardNumberInput").disabled = (setName == 'NONE')
-            document.getElementById("ClearSelection").disabled = false
-            document.getElementById("SwapCard").disabled = false
-            document.getElementById("UpdateCard").disabled = true
-            document.getElementById("SelectedCard").style.left = document.getElementById("Cell_" + selectedPage + "_" + selectedSlot).getBoundingClientRect().left - 7
-            document.getElementById("SelectedCard").style.top = document.getElementById("Cell_" + selectedPage + "_" + selectedSlot).getBoundingClientRect().top - 7
-            document.getElementById("SelectedCard").style.visibility = "visible"
-            document.getElementById("SelectedCard").style.borderColor = "green"         
-        }
-
-        function SwapCardButton()
-        {
-            if (swapCardMode)
+            function UpdatePages()
             {
-                document.getElementById("SwapCard").innerHTML = "Swap Card"
-                swapCardMode = false
-            }
-            else
-            {
-                document.getElementById("SwapCard").innerHTML = "Swapping Cards..."
-                swapCardMode = true
-            }
-        }
+                var leftPage = pageSection * 2
+                var rightPage = leftPage + 1
 
-        function ClearSelection()
-        {
-            selectedPage = 0;
-            selectedSlot = 0;
-            selectedSetName = "NONE";
-            selectedCardNumber = "";
-            swapCardMode = false
-            document.getElementById("SelectedPageNumber").value = 'N/A'
-            document.getElementById("SelectedSlotNumber").value = 'N/A'
-            document.getElementById("SetNameSelector").value = 'NONE'
-            document.getElementById("CardNumberInput").value = ''
-            document.getElementById("SetNameSelector").disabled = true
-            document.getElementById("CardNumberInput").disabled = true
-            document.getElementById("ClearSelection").disabled = true
-            document.getElementById("SwapCard").disabled = true
-            document.getElementById("UpdateCard").disabled = true
-            document.getElementById("SelectedCard").style.visibility = "hidden"
-            document.getElementById("SelectedCard").style.borderColor = "green"
-            document.getElementById("SwapCard").disabled = true
-            document.getElementById("SwapCard").innerHTML = "Swap Card"
-        }
+                var pages = document.getElementsByClassName("PokemonCardPage")
+                for (var i = 0; i < pages.length; i++)
+                {
+                    pages[i].style.visibility = "hidden"
+                    pages[i].style.display = "none"
+                }
 
-        function UpdatePages()
-        {
-            var leftPage = pageSection * 2
-            var rightPage = leftPage + 1
+                document.getElementById("PokemonCardPage" + leftPage).style.display = "inline-block"
+                document.getElementById("PokemonCardPage" + leftPage).style.visibility = "visible"
+                document.getElementById("PokemonCardPage" + rightPage).style.visibility = "visible"
+                document.getElementById("PokemonCardPage" + rightPage).style.display = "inline-block"
 
-            var pages = document.getElementsByClassName("PokemonCardPage")
-            for (var i = 0; i < pages.length; i++)
-            {
-                pages[i].style.visibility = "hidden"
-                pages[i].style.display = "none"
+                document.getElementById("SelectedCard").style.visibility =
+                    ((selectedPage == leftPage || selectedPage == rightPage) && selectedPage != 0 && selectedPage != 13 ? "visible" : "hidden")
             }
 
-            document.getElementById("PokemonCardPage" + leftPage).style.display = "inline-block"
-            document.getElementById("PokemonCardPage" + leftPage).style.visibility = "visible"
-            document.getElementById("PokemonCardPage" + rightPage).style.visibility = "visible"
-            document.getElementById("PokemonCardPage" + rightPage).style.display = "inline-block"
-
-            document.getElementById("SelectedCard").style.visibility =
-                ((selectedPage == leftPage || selectedPage == rightPage) && selectedPage != 0 && selectedPage != 13 ? "visible" : "hidden")
-        }
-
-        function MovePage(direction)
-        {
-            if (direction == "previous")
+            function MovePage(direction)
             {
-                if (pageSection > 0) pageSection--
-                UpdatePages()
+                if (direction == "previous")
+                {
+                    if (pageSection > 0) pageSection--
+                    UpdatePages()
+                }
+                else if(direction == "next")
+                {
+                    if (pageSection < (pageCount)/2) pageSection++
+                    UpdatePages()
+                }else
+                {
+                    return
+                }
+
+                document.getElementById("PagePreviousButton").disabled = false
+                document.getElementById("PageNextButton").disabled = false
+
+                var leftPage = pageSection * 2
+                var rightPage = leftPage + 1
+                var pageNumberHtml = "Pages <b>" + leftPage + "-" + rightPage + "</b>"
+
+                if (pageSection == 0)
+                {
+                    document.getElementById("PagePreviousButton").disabled = true
+                    pageNumberHtml = "Page <b>1</b>"
+                }
+                if (pageSection == (pageCount)/2)
+                {
+                    document.getElementById("PageNextButton").disabled = true
+                    pageNumberHtml = "Page <b>" + pageCount + "</b>"
+                }
+                document.getElementById("PageNumber").innerHTML = pageNumberHtml
             }
-            else if(direction == "next")
-            {
-                if (pageSection < (pageCount)/2) pageSection++
-                UpdatePages()
-            }else
-            {
-                return
-            }
-
-            document.getElementById("PagePreviousButton").disabled = false
-            document.getElementById("PageNextButton").disabled = false
-
-            var leftPage = pageSection * 2
-            var rightPage = leftPage + 1
-            var pageNumberHtml = "Pages <b>" + leftPage + "-" + rightPage + "</b>"
-
-            if (pageSection == 0)
-            {
-                document.getElementById("PagePreviousButton").disabled = true
-                pageNumberHtml = "Page <b>1</b>"
-            }
-            if (pageSection == (pageCount)/2)
-            {
-                document.getElementById("PageNextButton").disabled = true
-                pageNumberHtml = "Page <b>" + pageCount + "</b>"
-            }
-            document.getElementById("PageNumber").innerHTML = pageNumberHtml
-        }
     </script>
 </head>
 <body>
@@ -327,8 +330,8 @@
 </body>
 <footer>
     <script type="text/javascript" language="javascript">
-        UpdatePages()
-        ClearSelection()
+            UpdatePages()
+            ClearSelection()
     </script>
 </footer>
 </html>
