@@ -20,7 +20,7 @@ namespace Pokebook
             PokecardSlotTable = pokecardSlotTable;
             PokemonUserTable = pokecardBookTable;
             PokecardSlots = new Dictionary<(string, string), PokecardSlot>();
-            BookName = bookName ?? ""; 
+            BookName = bookName ?? "";
             PageCount = 12;
 
             var pokebookUsers = PokecardBook.GetPokebookUser(PokemonUserTable, BookName).GetAwaiter().GetResult();
@@ -32,7 +32,8 @@ namespace Pokebook
                     var rowKeySplit = cardSlot.RowKey.Split("-");
                     PokecardSlots.Add((rowKeySplit[0], rowKeySplit[1]), cardSlot);
                 }
-            } else NewBookFromUrl = true;
+            }
+            else NewBookFromUrl = true;
         }
 
         public async Task<string> GetHtml()
@@ -62,7 +63,7 @@ namespace Pokebook
             content += "<div class ='Boxdesign'>";
             content += "<h3>Book Details:</h3>";
             content += $"Book Name: <input id='BookNameInput' style='width:150;' onkeyup=\"BookDetailSelectorOnChange()\" {(BookName == "" ? "" : "disabled")} value='{BookName}'><br>";
-            content += $"Page Count: <input id='PageCountInput' style='width:140;' onkeyup=\"BookDetailSelectorOnChange()\" onChange=\"BookDetailSelectorOnChange()\" type='number' min='2' max='100' value='{(NewBookFromUrl ? "" :$"{PageCount}")}'><br>";
+            content += $"Page Count: <input id='PageCountInput' style='width:140;' onkeyup=\"BookDetailSelectorOnChange()\" onChange=\"BookDetailSelectorOnChange()\" type='number' min='2' max='100' value='{(NewBookFromUrl ? "" : $"{PageCount}")}'><br>";
             content += "</div><br><br><br>";
 
             content += "<div class ='Boxdesign'>";
@@ -91,8 +92,9 @@ namespace Pokebook
             content += "<option value='Crown Zenith'>Crown Zenith</option>";
             content += "</select><br>";
             content += "Card Number: <input id='CardNumberInput' onkeyup=\"SelectorOnChange()\" style='width:125;' disabled><br>";
-            content += "<button class ='buttonlayout' id='ClearSelection' onclick='ClearSelection()' disabled>Clear Selection</button>";
-            content += "<button class ='buttonlayout' id='UpdateCard' onclick='UpdateCard()' disabled>Update Card</button>";
+            content += "<button class ='buttonlayout' id='ClearSelection' onclick='ClearSelection()' disabled>Clear Selection</button><br><br>";
+            content += "<button class ='buttonlayout' id='UpdateCard' onclick='UpdateCard()' disabled>Update Card</button><br><br>";
+            content += "<button class ='buttonlayout' id='SwapCard' onclick='SwapCardButton()' disabled>Swap Card</button><br><br>";
             content += "</div><br><br><br>";
 
             content += "<div class ='Boxdesign'>";
@@ -108,7 +110,7 @@ namespace Pokebook
             content += "<div style='float:left'>";
             for (int page = 0; page <= PageCount + 1; page++)
             {
-                content += $"<div class='PokemonCardPage' id='PokemonCardPage{page}' style='display:inline-block;{(page == 0 || page == PageCount + 1 ? "opacity:0.3" : "")}'><table >";
+                content += $"<div class='PokemonCardPage' id='PokemonCardPage{page}' style='display:inline-block;{(page == 0 || page == PageCount + 1 ? "opacity:0.3" : "")}'><table>";
                 for (int row = 0; row < 3; row++)
                 {
                     content += "<tr>";
@@ -134,8 +136,6 @@ namespace Pokebook
                 content += "</table></div>";
             }
             content += "</div>";
-
-
 
             return content;
         }
