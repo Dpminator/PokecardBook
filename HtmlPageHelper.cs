@@ -13,13 +13,14 @@ namespace Pokebook
         private readonly Dictionary<(string, string), PokecardSlot> PokecardSlots;
         private readonly string BookName;
         private readonly int PageCount;
+        private readonly bool NewBookFromUrl = false;
 
         public PokemonBookPage(CloudTable pokecardSlotTable, CloudTable pokecardBookTable, string bookName)
         {
             PokecardSlotTable = pokecardSlotTable;
             PokemonUserTable = pokecardBookTable;
             PokecardSlots = new Dictionary<(string, string), PokecardSlot>();
-            BookName = string.IsNullOrEmpty(bookName) ? "" : bookName;
+            BookName = bookName ?? ""; 
             PageCount = 12;
 
             var pokebookUsers = PokecardBook.GetPokebookUser(PokemonUserTable, BookName).GetAwaiter().GetResult();
@@ -31,7 +32,7 @@ namespace Pokebook
                     var rowKeySplit = cardSlot.RowKey.Split("-");
                     PokecardSlots.Add((rowKeySplit[0], rowKeySplit[1]), cardSlot);
                 }
-            }
+            } else NewBookFromUrl = true;
         }
 
         public async Task<string> GetHtml()
@@ -47,8 +48,6 @@ namespace Pokebook
 
         private async Task<string> GetPokemonBookHtml()
         {
-            var newBook = BookName == "";
-
             var content = $"<script>bookName = \"{BookName}\"; pageCount = {PageCount};</script>";
 
             content += "<div style='float:left;width:300;'>";
@@ -62,8 +61,8 @@ namespace Pokebook
 
             content += "<div>";
             content += "<h3>Book Details:</h3>";
-            content += $"Book Name: <input id='BookNameInput' style='width:150;' onkeyup=\"BookDetailSelectorOnChange()\" {(newBook ? "" : "disabled")} value='{(newBook ? "" : BookName)}'><br>";
-            content += $"Page Count: <input id='PageCountInput' style='width:140;' onkeyup=\"BookDetailSelectorOnChange()\" onChange=\"BookDetailSelectorOnChange()\" type='number' min='2' max='100' value='{(newBook ? "12" : $"{PageCount}")}'><br>";
+            content += $"Book Name: <input id='BookNameInput' style='width:150;' onkeyup=\"BookDetailSelectorOnChange()\" {(BookName == "" ? "" : "disabled")} value='{BookName}'><br>";
+            content += $"Page Count: <input id='PageCountInput' style='width:140;' onkeyup=\"BookDetailSelectorOnChange()\" onChange=\"BookDetailSelectorOnChange()\" type='number' min='2' max='100' value='{(NewBookFromUrl ? "" :$"{PageCount}")}'><br>";
             content += "</div><br><br><br>";
 
             content += "<div>";
@@ -127,8 +126,8 @@ namespace Pokebook
                         }
 
                         var url = $"/api/card-image/{set}/{cardNumber.Replace("/", "-")}";
-                        var clickAction = page == 0 || page == PageCount + 1 ? "" : $"onclick=\"SelectCard({page}, {slot}, '{set}', '{cardNumber}')\"";
-                        content += $"<td><div class='PokemonCardCell' id='Cell_{page}_{slot}' style='background-image:url(\"{url}\")' {clickAction}></div></td>";
+                        var clickAction = page == 0 || page == PageCount + 1 ? "" : $"onclick=\"SelectCard({page}, {slot}, '{set.Replace("'", "\\'")}', '{cardNumber}')\"";
+                        content += $"<td><div class='PokemonCardCell' id='Cell_{page}_{slot}' style='background-image:url(\"{url.Replace("'", "&#39;")}\")' {clickAction}></div></td>";
                     }
                     content += "</tr>";
                 }
