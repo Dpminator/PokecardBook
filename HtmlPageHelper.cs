@@ -92,7 +92,8 @@ namespace Pokebook
             content += "</select><br>";
             content += "Card Number: <input id='CardNumberInput' onkeyup=\"SelectorOnChange()\" style='width:125;' disabled><br>";
             content += "<button id='ClearSelection' onclick='ClearSelection()' disabled>Clear Selection</button><br><br>";
-            content += "<button id='UpdateCard' onclick='UpdateCard()' disabled>Update Card</button>";
+            content += "<button id='UpdateCard' onclick='UpdateCard()' disabled>Update Card</button><br><br>";
+            content += "<button id='SwapCard' onclick='SwapCardButton()' disabled>Swap Card</button><br><br>";
             content += "</div><br><br><br>";
 
             content += "<div>";
@@ -134,8 +135,6 @@ namespace Pokebook
                 content += "</table></div>";
             }
             content += "</div>";
-
-
 
             return content;
         }
