@@ -263,3 +263,4 @@ paket-files/
 __pycache__/
 *.pyc
 /Properties/PublishProfiles/pokemon-card-book - Zip Deploy.pubxml
+/Properties/ServiceDependencies/pokemon-card-book - Zip Deploy/profile.arm.json

@@ -85,6 +85,8 @@
         {
             var chosenSetName = document.getElementById("SetNameSelector").value
             var chosenCardNumber = document.getElementById("CardNumberInput").value
+            selectedSetName = chosenSetName
+            selectedCardNumber = chosenCardNumber
             if (chosenCardNumber == "") chosenCardNumber = "0"
             if (chosenSetName == "") chosenSetName = "NONE"
             var cardImageUrl = '/api/card-image/' + chosenSetName + "/" + chosenCardNumber.replace("/", "-")
