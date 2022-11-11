@@ -1,8 +1,5 @@
 ﻿using Microsoft.Azure.Cosmos.Table;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Pokebook
@@ -43,17 +40,16 @@ namespace Pokebook
                     ETag = "*",
                     PartitionKey = bookName,
                     RowKey = $"{changeSplit[0]}-{changeSplit[1]}",
-                    SetName = changeSplit[2],
+                    SetName = BeautifySetName(changeSplit[2]),
                     CardNumber = changeSplit[3]
                 };
-                card.BeautifySetName();
                 await pokecardSlotTable.ExecuteAsync(card.SetName == "NONE" ? TableOperation.Delete(card) : TableOperation.InsertOrMerge(card));
             }
         }
 
-        protected void BeautifySetName()
+        public static string BeautifySetName(string setName)
         {
-            SetName = (SetName) switch
+            return (setName) switch
             {
                 "none" => "NONE",
                 "" => "NONE",
@@ -75,7 +71,7 @@ namespace Pokebook
                 "lost-origin" => "Lost Origin",
                 "silver-tempest" => "Silver Tempest",
                 "crown-zenith" => "Crown Zenith",
-                _ => SetName
+                _ => setName
             };
         }
 
@@ -105,6 +101,7 @@ namespace Pokebook
                 "fusion-strike" => "swsh8",
                 "brilliant-stars" => "swsh9",
                 "astral-radiance" => "swsh10",
+                "pokemon-go" => "pgo",
                 "lost-origin" => "swsh11",
                 "silver-tempest" => "swsh12",
                 "crown-zenith" => "swsh125",
@@ -115,6 +112,11 @@ namespace Pokebook
             {
                 setId += "tg";
                 cardNumber = "TG" + cardNumber.Substring(cardNumber.StartsWith("TG") ? 2 : 0).PadLeft(2, '0');
+            }
+            if (cardNumber.StartsWith("SV"))
+            {
+                setId += "sv";
+                cardNumber = "SV" + cardNumber.Substring(cardNumber.StartsWith("SV") ? 2 : 0).PadLeft(3, '0');
             }
 
             var cardNumberSplit = cardNumber.Split('/');
@@ -140,6 +142,48 @@ namespace Pokebook
             if (setId == "swshp") cardNumber = "SWSH" + cardNumber.PadLeft(3, '0');
 
             return $"https://images.pokemoncard.io/images/{setId}/{setId}-{cardNumber}_hiresopt.jpg";
+        }
+
+        public static string GetPokecardImageUrl2(string cardSet, string cardNumber)
+        {
+            if (string.IsNullOrEmpty(cardSet) || string.IsNullOrEmpty(cardNumber) || cardSet == "NONE" || cardNumber == "0")
+                return "https://images.pokemoncard.io/images/assets/CardBack.jpg";
+
+            cardNumber = cardNumber.ToUpper().Substring(cardNumber.StartsWith("SWSH") ? 4 : 0).TrimStart('0').Replace("-", "/").Split("/")[0];
+
+            var setId = cardSet.ToLower().Replace(" ", "-").Replace("'", "") switch
+            {
+                "promo" => "swshpromos",
+                "base" => "swordshield",
+                "sword-and-shield" => "swordshield",
+                "sword-shield" => "swordshield",
+                "rebel-clash" => "rebelclash",
+                "darkness-ablaze" => "darknessablaze",
+                "champions-path" => "champion'spath",
+                "vivid-voltage" => "vividvoltage",
+                "shining-fates" => "shiningfates",
+                "battle-styles" => "battlestyles",
+                "chilling-reign" => "chillingreign",
+                "evolving-skies" => "evolvingskies",
+                "celebrations" => "celebrations",
+                "celebrations-classic" => "celebrationsclassic",
+                "fusion-strike" => "fusionstrike",
+                "brilliant-stars" => "brilliantstars",
+                "astral-radiance" => "astralradiance",
+                "pokemon-go" => "pokemongo",
+                "lost-origin" => "lostorigin",
+                "silver-tempest" => "silvertempest",
+                "crown-zenith" => "crownzenith",
+                _ => throw new Exception($"'{cardSet}' is not a valid set!")
+            };
+
+            if (cardNumber.StartsWith("TG") || cardNumber.StartsWith("SV") || setId == "celebrationsclassic")
+            {
+                if (setId == "celebrationsclassic") setId = "celebrations";
+                cardNumber = "h" + cardNumber.Substring(setId == "celebrations" ? 0 : 2).TrimStart('0');
+            }
+
+            return $"https://www.serebii.net/card/{setId}/{cardNumber}.jpg";
         }
     }
 

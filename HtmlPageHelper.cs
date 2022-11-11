@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Net.Http;
 using System.Threading.Tasks;
 
 namespace Pokebook
@@ -86,6 +87,7 @@ namespace Pokebook
             content += "<option value='Celebrations Classic'>Celebrations: Classic</option>";
             content += "<option value='Fusion Strike'>Fusion Strike</option>";
             content += "<option value='Brilliant Stars'>Brilliant Stars</option>";
+            content += "<option value='Pokemon Go'>Pokemon Go</option>";
             content += "<option value='Astral Radiance'>Astral Radiance</option>";
             content += "<option value='Lost Origin'>Lost Origin</option>";
             content += "<option value='Silver Tempest'>Silver Tempest</option>";
@@ -140,4 +142,56 @@ namespace Pokebook
             return content;
         }
     }
+
+    public class EbayHelper
+    {
+        public class EbayItem
+        { 
+            public string Name { get; set; }
+            public double Price { get; set; }
+            public string Link { get; set; }
+        }
+
+        public static async Task<List<EbayItem>> GetPokecardEbayResults(string cardSet, string cardNumber)
+        {
+            var ebayItems = new List<EbayItem>();
+
+            cardSet = PokecardSlot.BeautifySetName(cardSet);
+            if (string.IsNullOrEmpty(cardSet) || string.IsNullOrEmpty(cardNumber) || cardSet.ToUpper() == "NONE" || cardNumber == "0") return ebayItems;
+
+            cardNumber = cardNumber.ToUpper().Substring(cardNumber.StartsWith("SWSH") ? 4 : 0).TrimStart('0').Replace("-", "/");
+            if (cardSet == "Promo") cardNumber = "SWSH" + cardNumber;
+
+            var url = $"https://www.ebay.com.au/sch/i.html?_from=R40&_nkw={cardSet.Replace(" ", "+")}+{cardNumber}+-digital+-grade+-graded+-PSA+-DSG&_sacat=0&LH_TitleDesc=0&LH_BIN=1&_sop=15&rt=nc&LH_PrefLoc=1";
+            var ebayResponse = await new HttpClient().GetAsync(url);
+            var ebayHtml = ebayResponse.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+
+            var itemCount = 0;
+            foreach (var listedItem in ebayHtml.Split("s-item s-item__pl-on-bottom s-item--watch-at-corner"))
+            {
+                if (itemCount == 5) break;
+                if (listedItem.Contains("<span role=heading aria-level=3>"))
+                {
+                    var name = listedItem.Split("<span role=heading aria-level=3>")[1].Split("</span>")[0];
+                    if (name.Contains(cardSet) && name.Contains(cardNumber))
+                    {
+                        var itemPrice = double.Parse(listedItem.Split("<span class=s-item__price>")[1].Split("</span>")[0].Split("AU $")[1]);
+                        var shippingCost = 0.0d;
+                        if (!listedItem.Contains("Free postage"))
+                        {
+                            shippingCost = double.Parse(listedItem.Split("<span class=\"s-item__shipping s-item__logisticsCost\">")[1].Split("</span>")[0].Split("AU $")[1].Split(" ")[0]);
+                        }
+                        var totalPrice = Math.Round(itemPrice + shippingCost, 2);
+                        var ebayLinkToItem = listedItem.Split("class=s-item__link href=")[1].Split("?")[0];
+
+                        ebayItems.Add(new EbayItem { Name = name, Price = totalPrice, Link = ebayLinkToItem});
+                        itemCount++;
+                    }
+                }
+            }
+            return ebayItems;
+        }
+
+    }
+
 }
