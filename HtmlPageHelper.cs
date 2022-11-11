@@ -87,6 +87,7 @@ namespace Pokebook
             content += "<option value='Celebrations Classic'>Celebrations: Classic</option>";
             content += "<option value='Fusion Strike'>Fusion Strike</option>";
             content += "<option value='Brilliant Stars'>Brilliant Stars</option>";
+            content += "<option value='Pokemon Go'>Pokemon Go</option>";
             content += "<option value='Astral Radiance'>Astral Radiance</option>";
             content += "<option value='Lost Origin'>Lost Origin</option>";
             content += "<option value='Silver Tempest'>Silver Tempest</option>";

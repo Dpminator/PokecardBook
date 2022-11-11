@@ -5,6 +5,7 @@ using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.AspNetCore.Http;
 using System.Net.Http;
 using Microsoft.Azure.Cosmos.Table;
+using System.Collections.Generic;
 
 namespace Pokebook
 {
@@ -15,13 +16,21 @@ namespace Pokebook
             [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "card-image/{set}/{number}")] HttpRequest req, Microsoft.Azure.WebJobs.ExecutionContext exeCon,
             string set, string number)
         {
-            var url = PokecardSlot.GetPokecardImageUrl(set, number);
-            var backupUrl = "https://www.mypokecard.com/en/Gallery/my/galery/5c4Z3OUCKurc.jpg";
+            var urls = new List<string>()
+            {
+                PokecardSlot.GetPokecardImageUrl(set, number),
+                PokecardSlot.GetPokecardImageUrl2(set, number),
+                "https://www.mypokecard.com/en/Gallery/my/galery/5c4Z3OUCKurc.jpg"
+            };
 
-            var imageResponse = await new HttpClient().GetAsync(url);
-            if (imageResponse.IsSuccessStatusCode) 
-                return new FileContentResult(await (imageResponse).Content.ReadAsByteArrayAsync(), "image/jpeg");
-            return new FileContentResult(await (await new HttpClient().GetAsync(backupUrl)).Content.ReadAsByteArrayAsync(), "image/jpeg"); 
+            foreach (var url in urls)
+            {
+                var imageResponse = await new HttpClient().GetAsync(url);
+                if (imageResponse.IsSuccessStatusCode) 
+                    return new FileContentResult(await (imageResponse).Content.ReadAsByteArrayAsync(), "image/jpeg");
+            }
+
+            return new FileContentResult(new byte[0], "image/jpeg"); 
         }
 
         [FunctionName("GetPokemonEbayResults")]
