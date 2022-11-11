@@ -24,6 +24,15 @@ namespace Pokebook
             return new FileContentResult(await (await new HttpClient().GetAsync(backupUrl)).Content.ReadAsByteArrayAsync(), "image/jpeg"); 
         }
 
+        [FunctionName("GetPokemonEbayResults")]
+        public static async Task<OkObjectResult> GetPokemonCardEbayResults(
+            [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "ebay-results/{set}/{number}")] HttpRequest req, Microsoft.Azure.WebJobs.ExecutionContext exeCon,
+            string set, string number)
+        {
+            var json = await EbayHelper.GetPokecardEbayResults(set, number);
+            return new OkObjectResult(json);
+        }
+
         [FunctionName("PokemonBook")]
         public static async Task<ContentResult> ProducePokemonBookHtmlPage(
             [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "pokemon-book")] HttpRequest req,

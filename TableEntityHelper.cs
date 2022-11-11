@@ -1,8 +1,5 @@
 ﻿using Microsoft.Azure.Cosmos.Table;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Pokebook
@@ -43,17 +40,16 @@ namespace Pokebook
                     ETag = "*",
                     PartitionKey = bookName,
                     RowKey = $"{changeSplit[0]}-{changeSplit[1]}",
-                    SetName = changeSplit[2],
+                    SetName = BeautifySetName(changeSplit[2]),
                     CardNumber = changeSplit[3]
                 };
-                card.BeautifySetName();
                 await pokecardSlotTable.ExecuteAsync(card.SetName == "NONE" ? TableOperation.Delete(card) : TableOperation.InsertOrMerge(card));
             }
         }
 
-        protected void BeautifySetName()
+        public static string BeautifySetName(string setName)
         {
-            SetName = (SetName) switch
+            return (setName) switch
             {
                 "none" => "NONE",
                 "" => "NONE",
@@ -75,7 +71,7 @@ namespace Pokebook
                 "lost-origin" => "Lost Origin",
                 "silver-tempest" => "Silver Tempest",
                 "crown-zenith" => "Crown Zenith",
-                _ => SetName
+                _ => setName
             };
         }
 
