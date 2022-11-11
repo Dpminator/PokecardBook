@@ -162,7 +162,7 @@ namespace Pokebook
             cardNumber = cardNumber.ToUpper().Substring(cardNumber.StartsWith("SWSH") ? 4 : 0).TrimStart('0').Replace("-", "/");
             if (cardSet == "Promo") cardNumber = "SWSH" + cardNumber;
 
-            var url = $"https://www.ebay.com.au/sch/i.html?_from=R40&_nkw={cardSet.Replace(" ", "+")}+{cardNumber}+-digital+-grade+-graded+-PSA+-DSG&_sacat=0&LH_TitleDesc=0&LH_BIN=1&_sop=15&rt=nc&LH_PrefLoc=1";
+            var url = $"https://www.ebay.com.au/sch/i.html?_from=R40&_nkw={cardSet.Replace(" ", "+")}+{cardNumber}+-digital+-online+-grade+-graded+-PSA+-DSG&_sacat=0&LH_TitleDesc=0&LH_BIN=1&_sop=15&rt=nc&LH_PrefLoc=1";
             var ebayResponse = await new HttpClient().GetAsync(url);
             var ebayHtml = ebayResponse.Content.ReadAsStringAsync().GetAwaiter().GetResult();
 
