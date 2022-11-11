@@ -152,7 +152,7 @@ namespace Pokebook
             public string Link { get; set; }
         }
 
-        public static async Task<List<EbayItem>> GetPokecardEbayResults(string cardSet, string cardNumber)
+        public static async Task<List<EbayItem>> GetPokecardEbayPrices(string cardSet, string cardNumber)
         {
             var ebayItems = new List<EbayItem>();
 
@@ -191,7 +191,6 @@ namespace Pokebook
             }
             return ebayItems;
         }
-
     }
 
 }
