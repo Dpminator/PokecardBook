@@ -47,14 +47,18 @@
         }
 
         #SelectedCard {
-            transform: translateY(7px);
+            transform: translateY(13px) translateX(8px);
             position: fixed;
-            z-index: 2;
-            width: 183px;
-            height: 255px;
+            z-index: 1;
+            width: 175px;
+            height: 250px;
             visibility: hidden;
-            border: 5px solid;
-            border-color: green;
+            border: 0.3px solid;
+            border-radius:7px;
+            box-shadow:
+                -0.5px -0.5px 4px 3px forestgreen,
+                 0.5px 0.5px 4px 3px forestgreen;
+            border-color: forestgreen;
         }
 
         .PokemonCardCell {
