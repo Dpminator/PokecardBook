@@ -51,7 +51,7 @@ namespace Pokebook
         {
             var content = $"<script>bookName = \"{BookName}\"; pageCount = {PageCount};</script>";
 
-            content += "<div style='float:left;width:300;'>";
+            content += "<div style='float:left;width:300;margin-right:15px;'>";
 
             content += "<h3>Page Selector:</h3>";
             content += "<div style='display:flex;'>";
@@ -110,7 +110,7 @@ namespace Pokebook
             content += "<div style='float:left'>";
             for (int page = 0; page <= PageCount + 1; page++)
             {
-                content += $"<div class='PokemonCardPage' id='PokemonCardPage{page}' style='display:inline-block;{(page == 0 || page == PageCount + 1 ? "opacity:0.3" : "")}'><table>";
+                content += $"<div class='{(page == 0 || page == PageCount + 1 ? "PokemonCardPageBlank" : "PokemonCardPage")}' id='PokemonCardPage{page}' style='display:inline-block;{(page == 0 || page == PageCount + 1 ? "opacity:0.3" : "")}'><table>";
                 for (int row = 0; row < 3; row++)
                 {
                     content += "<tr>";

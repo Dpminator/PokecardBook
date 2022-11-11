@@ -17,8 +17,8 @@
             white-space: nowrap;
         }
 
-        td img:hover {
-            transform: translateY(-10px);
+        .PokemonCardPage img:hover {
+            transform: translateY(-7px);
             -webkit-mask: linear-gradient(-70deg,#000 40%,#0005,#000 60%) right/300%;
             animation: shimmer 0.8s;
         }
@@ -47,7 +47,7 @@
         }
 
         #SelectedCard {
-            transform: translateY(10px);
+            transform: translateY(7px);
             position: fixed;
             z-index: 2;
             width: 183px;
@@ -62,14 +62,23 @@
             height: 250px;
         }
 
+        .PokemonCardPageBlank {
+            padding: 10px;
+            float: left;
+        }
+
         .PokemonCardPage {
             padding: 10px;
             float: left;
         }
 
-            .PokemonCardPage > table {
-                border: 4px solid black;
-            }
+        .PokemonCardPageBlank > table {
+            border: 4px solid black;
+        }
+
+        .PokemonCardPage > table {
+            border: 4px solid black;
+        }
 
         .Boxdesign {
             border: 2px solid #212121;
@@ -78,8 +87,6 @@
             padding: 10px;
             margin: 10px;
         }
-
-
 
         .buttonlayout {
             display: inline-flex;
@@ -133,7 +140,7 @@
 
             document.getElementById("SelectedCard").style.borderColor = "green"
             document.getElementById("UpdateCard").disabled = true
-            document.getElementById("Cell_" + selectedPage + "_" + selectedSlot).style.backgroundImage = "url(\"" + cardImageUrl + "\")"
+            document.getElementById("Cell_" + selectedPage + "_" + selectedSlot).src = cardImageUrl;
 
             var update = selectedPage + '_' + selectedSlot + '_' + chosenSetName.toLowerCase().replace(" ", "-").replace(" ", "-").replace("'", "") + "_" + chosenCardNumber + ","
             listOfChanges += update
@@ -297,13 +304,19 @@
                 pages[i].style.display = "none"
             }
 
+            var pages = document.getElementsByClassName("PokemonCardPageBlank")
+            for (var i = 0; i < pages.length; i++) {
+                pages[i].style.visibility = "hidden"
+                pages[i].style.display = "none"
+            }
+
             document.getElementById("PokemonCardPage" + leftPage).style.display = "inline-block"
             document.getElementById("PokemonCardPage" + leftPage).style.visibility = "visible"
             document.getElementById("PokemonCardPage" + rightPage).style.visibility = "visible"
             document.getElementById("PokemonCardPage" + rightPage).style.display = "inline-block"
 
             document.getElementById("SelectedCard").style.visibility =
-                ((selectedPage == leftPage || selectedPage == rightPage) && selectedPage != 0 && selectedPage != 13 ? "visible" : "hidden")
+                ((selectedPage == leftPage || selectedPage == rightPage) && selectedPage != 0 && selectedPage != pageCount+1 ? "visible" : "hidden")
         }
 
         function MovePage(direction) {
