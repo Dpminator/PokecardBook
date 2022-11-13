@@ -7,6 +7,21 @@
 
         table, th, tr, td {
             border: 1px solid black;
+            background-color:white;
+        }
+
+        .FFlip {
+            z-index: 4;
+            transform: rotateX(8deg) rotateY(180deg);
+            transform-origin: center left;
+            backface-visibility: hidden;
+        }
+
+        .RFlip {
+            z-index: 3;
+            transform: rotateX(8deg) rotateY(180deg) scaleX(-1) scaleY(1.01);
+            margin-left: -603px;
+            transform-origin: center right;
         }
 
         th, td {
@@ -24,8 +39,9 @@
         }
 
         @keyframes shimmer {
+
             100% {
-                -webkit-mask-position: left
+                -webkit-mask-position: left;
             }
         }
 
@@ -49,7 +65,7 @@
         #SelectedCard {
             transform: translateY(13px) translateX(8px);
             position: fixed;
-            z-index: 1;
+            z-index: 99;
             width: 175px;
             height: 250px;
             visibility: hidden;
@@ -72,8 +88,11 @@
         }
 
         .PokemonCardPage {
-            padding: 10px;
-            float: left;
+           padding: 10px;
+           float: left;
+           position:absolute;
+           transform-style: preserve-3d;
+           transition: all .5s linear;
         }
 
         .PokemonCardPageBlank > table {
@@ -305,20 +324,28 @@
 
             var pages = document.getElementsByClassName("PokemonCardPage")
             for (var i = 0; i < pages.length; i++) {
-                pages[i].style.visibility = "hidden"
-                pages[i].style.display = "none"
+                //pages[i].style.visibility = "hidden"
+                //pages[i].style.display = "none"
+                //pages[i].classList.remove("FFlip")
+                //pages[i].classList.remove("RFlip")
+                pages[i].style.position = "absolute"
+                pages[i].style.zIndex = -1
             }
+
+          
 
             var pages = document.getElementsByClassName("PokemonCardPageBlank")
             for (var i = 0; i < pages.length; i++) {
-                pages[i].style.visibility = "hidden"
-                pages[i].style.display = "none"
+                /*pages[i].style.visibility = "hidden"*/
+                pages[i].style.display = "inline-block"
+                
             }
-
+            document.getElementById("PokemonCardPage" + rightPage).style.zIndex = 1
+            document.getElementById("PokemonCardPage" + (leftPage - 1 > 1 ? leftPage - 1 : leftPage)).style.zIndex = 2
+            document.getElementById("PokemonCardPage" + leftPage).style.zIndex = 3
+            /*document.getElementById("PokemonCardPage" + leftPage).style.position = "relative"*/
             document.getElementById("PokemonCardPage" + leftPage).style.display = "inline-block"
-            document.getElementById("PokemonCardPage" + leftPage).style.visibility = "visible"
-            document.getElementById("PokemonCardPage" + rightPage).style.visibility = "visible"
-            document.getElementById("PokemonCardPage" + rightPage).style.display = "inline-block"
+
 
             document.getElementById("SelectedCard").style.visibility =
                 ((selectedPage == leftPage || selectedPage == rightPage) && selectedPage != 0 && selectedPage != pageCount+1 ? "visible" : "hidden")
@@ -328,10 +355,14 @@
             if (direction == "previous") {
                 if (pageSection > 0) pageSection--
                 UpdatePages()
+                document.getElementById("PokemonCardPage" + ((pageSection == 0 ? 2 : (pageSection * 2) + 2))).classList.remove("RFlip");
+                document.getElementById("PokemonCardPage" + ((pageSection == 0 ? 1 : (pageSection * 2) + 1))).classList.remove("FFlip");
             }
             else if (direction == "next") {
-                if (pageSection < (pageCount) / 2) pageSection++
+                if (pageSection < (pageCount) / 2) pageSection++  
                 UpdatePages()
+                document.getElementById("PokemonCardPage" + (pageSection * 2)).classList.add("RFlip");
+                document.getElementById("PokemonCardPage" + ((pageSection * 2) - 1)).classList.add("FFlip"); 
             } else {
                 return
             }
