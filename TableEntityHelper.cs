@@ -68,6 +68,7 @@ namespace Pokebook
                 "fusion-strike" => "Fusion Strike",
                 "brilliant-stars" => "Brilliant Stars",
                 "astral-radiance" => "Astral Radiance",
+                "pokemon-go" => "Pokemon Go",
                 "lost-origin" => "Lost Origin",
                 "silver-tempest" => "Silver Tempest",
                 "crown-zenith" => "Crown Zenith",
