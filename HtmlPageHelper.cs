@@ -218,7 +218,7 @@ namespace Pokebook
             public int StrataFess { get; set; }
         }
 
-        private static readonly string sqlConnString = "Server=random-projects.database.windows.net;Database=lucas;User Id=dominic;Password=vbMtvdvP6a7ixD;";
+        private static readonly string sqlConnString = System.Environment.GetEnvironmentVariable("LucasDbConnString");
         private static readonly string lucasResultsUrl = "https://www.lucasre.com.au/pages/real-estate/results?listing_sale_method=Sale&status=&display_sale_method=BUY&listing_suburb_search=Docklands%2C+VIC+3008%3B+&listing_category=&listing_price_from=450000&listing_price_to=650000&listing_bedrooms=2&listing_bathrooms=1&surrounds=false";
 
         private static DataTable QuerySql(string query)
@@ -360,15 +360,15 @@ namespace Pokebook
                     if (sizeMetresSquared == 0 || councilRates == 0 || waterRates == 0 || strataFees == 0)
                     {
                         status = "MissingInfo";
-                    } else if (lucasHtml2.Contains("<div class=\"main-badge large\">"))
+                    } else if (lucasHtml2.Contains("<div class='main-badge large'>"))
                     {
-                        status = $"Badge:{lucasHtml2.Split("<div class=\"main-badge large\">")[1].Split("</div>")[0]}";
+                        status = $"Badge:{lucasHtml2.Split("<div class='main-badge large'>")[1].Split("</div>")[0].Trim()}";
                     }
 
                     var statusUpdate = (!newProperty && status != sqlProperty.Status);
                     if (statusUpdate)
                     {
-                        oldStatus = status;
+                        oldStatus = sqlProperty.Status;
                         sqlProperty.Status = status;
                     }
 
@@ -420,13 +420,13 @@ namespace Pokebook
             var changes = "";
             if (changedSqlProperties.Count > 0)
             {
-                if (changedSqlProperties.Exists(x => x.newStatus == "Inactive")) changes += "\\nNow Inactive:\\n";
+                if (changedSqlProperties.Exists(x => x.newStatus == "Inactive")) changes += "\\n\\nNow Inactive:\\n\\n";
                 foreach (var (_, _, _, _, _, _, _, property) in changedSqlProperties.Where(x => x.newStatus == "Inactive"))
                 {
-                    changes += $"{property.Address}, {property.Suburb}: ${property.MinimumPrice} - ${property.MaximumPrice} ({property.WebsiteLink})\\n";
+                    changes += $"{property.Address}, {property.Suburb}: ${property.MinimumPrice} - ${property.MaximumPrice} ({property.WebsiteLink})\\n\\n";
                 }
 
-                if (changedSqlProperties.Exists(x => x.newStatus != "Inactive" && !x.newProperty)) changes += "\\nUpdated Properties:\\n";
+                if (changedSqlProperties.Exists(x => x.newStatus != "Inactive" && !x.newProperty)) changes += "\\n\\nUpdated Properties:\\n\\n";
                 foreach (var (_, oldMin, newMin, oldMax, newMax, oldStatus, newStatus, property) in changedSqlProperties.Where(x => x.newStatus != "Inactive" && !x.newProperty))
                 {
                     changes += $"{property.Address}, {property.Suburb}: ";
@@ -439,18 +439,18 @@ namespace Pokebook
                         if (oldStatus != "") changes += " and ";
                         changes += $"From ${oldMin} - ${oldMax} to ${newMin} - ${newMax}";
                     }
-                    changes += $" ({property.WebsiteLink})\\n";
+                    changes += $" ({property.WebsiteLink})\\n\\n";
                 }
 
-                if (changedSqlProperties.Exists(x => x.newStatus != "Inactive" && x.newProperty)) changes += "\\nNew Properties:\\n";
+                if (changedSqlProperties.Exists(x => x.newStatus != "Inactive" && x.newProperty)) changes += "\\n\\nNew Properties:\\n\\n";
                 foreach (var (_, _, newMin, _, newMax, _, newStatus, property) in changedSqlProperties.Where(x => x.newStatus != "Inactive" && x.newProperty))
                 {
-                    changes += $"{property.Address}, {property.Suburb}: ${newMin} - ${newMax} for {property.AreaSquareMeters} square meters ({property.WebsiteLink})\\n";
+                    changes += $"{property.Address}, {property.Suburb}: ${newMin} - ${newMax} for {property.AreaSquareMeters} square meters ({property.WebsiteLink})\\n\\n";
                 }
 
                 changes += $"\\nCheck out all the properties here: {lucasResultsUrl}";
 
-                await PingDiscord($"there have been changes:\\n{changes}");
+                await PingDiscord($"there have been changes:{changes}");
             }
             return changes;
         }

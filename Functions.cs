@@ -55,7 +55,7 @@ namespace Pokebook
         [FunctionName("DomTest")]
         public static async Task<OkObjectResult> Test([HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "dom-test")] HttpRequest req, ExecutionContext exeCon)
         {
-            var test = "TEST";
+            var test = await LucasHelper.UpdateLucasProperties();
             return new OkObjectResult(test);
         }
 
