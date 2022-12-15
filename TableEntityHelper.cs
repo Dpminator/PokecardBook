@@ -186,6 +186,31 @@ namespace Pokebook
 
             return $"https://www.serebii.net/card/{setId}/{cardNumber}.jpg";
         }
+
+        public static string GetPokecardImageUrlZenith(string cardSet, string cardNumber)
+        {
+            if (cardSet == "Crown Zenith" && cardNumber.StartsWith("JP"))
+                return $"https://www.serebii.net/card/vstaruniverse/{cardNumber.Replace("JP", "")}.jpg";
+            return "";
+        }
+
+        public static string GetPokecardImageUrlZenith2(string cardSet, string cardNumber)
+        {
+            if (cardSet != "Crown Zenith" || !cardNumber.StartsWith("JP")) return "";
+
+            return cardNumber.Replace("JP", "") switch
+            {
+                "185" => "https://www.pokebeach.com/news/2022/11/Deoxys-Art-Rare.jpg",
+                "173" => "https://www.pokebeach.com/news/2022/11/Voltorb-Art-Rare.jpg",
+                "193" => "https://www.pokebeach.com/news/2022/11/Magnezone-Art-Rare.jpg",
+                "266" => "https://www.pokebeach.com/news/2022/11/Elesas-Sparkle-Full-Art.png",
+                "245" => "https://www.pokebeach.com/news/2022/11/Volo-Full-Art.png",
+                "249" => "https://www.pokebeach.com/news/2022/11/Hisui-Friends.jpg",
+                "247" => "https://www.pokebeach.com/news/2022/11/Sinnoh-Friends.jpg",
+                "195" => "https://www.pokebeach.com/news/2022/11/Latias-Art-Rare-2.png",
+                _ =>  ""
+            };
+        }
     }
 
     public class PokecardBook : CustomTableEntity

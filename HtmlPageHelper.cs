@@ -1,8 +1,13 @@
 ﻿using Microsoft.Azure.Cosmos.Table;
 using System;
 using System.Collections.Generic;
+using System.Data;
+using System.Data.SqlClient;
 using System.IO;
+using System.Linq;
 using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace Pokebook
@@ -162,7 +167,7 @@ namespace Pokebook
             cardNumber = cardNumber.ToUpper().Substring(cardNumber.StartsWith("SWSH") ? 4 : 0).TrimStart('0').Replace("-", "/");
             if (cardSet == "Promo") cardNumber = "SWSH" + cardNumber;
 
-            var url = $"https://www.ebay.com.au/sch/i.html?_from=R40&_nkw={cardSet.Replace(" ", "+")}+{cardNumber}+-digital+-online+-grade+-graded+-PSA+-DSG&_sacat=0&LH_TitleDesc=0&LH_BIN=1&_sop=15&rt=nc&LH_PrefLoc=1";
+            var url = $"https://www.ebay.com.au/sch/i.html?_from=R40&_nkw={cardSet.Replace(" ", "+")}+{cardNumber}+-digital+-online+-grade+-graded+-PSA+-DSG&LH_TitleDesc=0&LH_BIN=1&_sop=15&rt=nc&LH_PrefLoc=1";
             var ebayResponse = await new HttpClient().GetAsync(url);
             var ebayHtml = ebayResponse.Content.ReadAsStringAsync().GetAwaiter().GetResult();
 
@@ -190,6 +195,272 @@ namespace Pokebook
                 }
             }
             return ebayItems;
+        }
+    }
+
+    public class LucasHelper
+    {
+        public class LucasItem
+        {
+            public int PropertyId { get; set; }
+            public string Address { get; set; }
+            public string Suburb { get; set; }
+            public string WebsiteLink { get; set; }
+            public string Status { get; set; }
+            public int MinimumPrice { get; set; }
+            public int MaximumPrice { get; set; }
+            public int BedroomCount { get; set; }
+            public int BathroomCount { get; set; }
+            public int CarparkCount { get; set; }
+            public int AreaSquareMeters { get; set; }
+            public int CouncilRates { get; set; }
+            public int WaterRates { get; set; }
+            public int StrataFess { get; set; }
+        }
+
+        private static readonly string sqlConnString = "Server=random-projects.database.windows.net;Database=lucas;User Id=dominic;Password=vbMtvdvP6a7ixD;";
+        private static readonly string lucasResultsUrl = "https://www.lucasre.com.au/pages/real-estate/results?listing_sale_method=Sale&status=&display_sale_method=BUY&listing_suburb_search=Docklands%2C+VIC+3008%3B+&listing_category=&listing_price_from=450000&listing_price_to=650000&listing_bedrooms=2&listing_bathrooms=1&surrounds=false";
+
+        private static DataTable QuerySql(string query)
+        {
+            DataTable dataTable = new();
+            using SqlConnection sqlConnection = new(sqlConnString);
+            using SqlCommand sqlCommand = sqlConnection.CreateCommand();
+            sqlCommand.CommandText = query;
+            sqlCommand.CommandType = CommandType.Text;
+            sqlConnection.Open();
+            var rows_returned = (new SqlDataAdapter(sqlCommand)).Fill(dataTable);
+            sqlConnection.Close();
+            return dataTable;
+        }
+
+        private static int GetFeesPerAnnum(string html, string feeName)
+        {
+            var fee = 0;
+            if (html.Contains($"<span class=\"detail-title\">{feeName}</span>"))
+            {
+                var feeText = html.Split($"{feeName}</span>\n<span class=\"detail-text\">$")[1].Split("</span>")[0];
+                fee = int.Parse(html.Split($"{feeName}</span>\n<span class=\"detail-text\">$")[1].Split(" per ")[0].Replace(",", "").Split(".")[0]);
+
+                if (feeText.ToLower().Contains("annum")) return fee;
+                if (feeText.ToLower().Contains("quarter")) return fee * 4;
+                if (feeText.ToLower().Contains("month")) return fee * 12;
+
+                Console.WriteLine($"feeText '{feeText}' is not accounted for yet!");
+            }
+            return fee;
+        }
+
+        public static async Task SetUpDatabaseTables()
+        {
+            var queryTemplate = "IF EXISTS (SELECT * FROM information_schema.tables WHERE table_name = '{{TABLENAME}}') SELECT 1 ELSE SELECT 0";
+
+            var propertyTableExists = QuerySql(queryTemplate.Replace("{{TABLENAME}}", "Property")).AsEnumerable().First().ItemArray[0].ToString() == "1";
+            var priceHistoryTableExists = QuerySql(queryTemplate.Replace("{{TABLENAME}}", "PriceHistory")).AsEnumerable().First().ItemArray[0].ToString() == "1";
+            var statusHistoryTableExists = QuerySql(queryTemplate.Replace("{{TABLENAME}}", "StatusHistory")).AsEnumerable().First().ItemArray[0].ToString() == "1";
+
+            if (!propertyTableExists || !priceHistoryTableExists || !statusHistoryTableExists)
+            {
+                throw new Exception("Database tables not properly set up!");
+            }
+        }
+
+        public static async Task<string> UpdateLucasProperties()
+        {
+            var changedSqlProperties = new List<(bool newProperty, int oldMin, int newMin, int oldMax, int newMax, string oldStatus, string newStatus, LucasItem property)>();
+            var sqlProperties = new List<LucasItem>();
+
+            var getAllActiveProperties = "SELECT * FROM Property p INNER JOIN StatusHistory sh ON p.PropertyId = sh.PropertyId AND sh.StatusHistoryId = (SELECT MAX(StatusHistoryId) FROM StatusHistory WHERE PropertyId = p.PropertyId) INNER JOIN PriceHistory ph ON p.PropertyId = ph.PropertyId AND ph.PriceHistoryId = (SELECT MAX(PriceHistoryId) FROM PriceHistory WHERE PropertyId = p.PropertyId) where sh.[Status] != 'Inactive'";
+
+            var dt = QuerySql(getAllActiveProperties);
+            foreach (var sqlResult in dt.AsEnumerable())
+            {
+                sqlProperties.Add(
+                    new LucasItem
+                    {
+                        PropertyId = int.Parse(sqlResult.ItemArray[dt.Columns.IndexOf("PropertyId")].ToString()),
+                        Address = sqlResult.ItemArray[dt.Columns.IndexOf("Address")].ToString(),
+                        Suburb = sqlResult.ItemArray[dt.Columns.IndexOf("Suburb")].ToString(),
+                        WebsiteLink = sqlResult.ItemArray[dt.Columns.IndexOf("WebsiteLink")].ToString(),
+                        Status = sqlResult.ItemArray[dt.Columns.IndexOf("Status")].ToString(),
+                        MinimumPrice = int.Parse(sqlResult.ItemArray[dt.Columns.IndexOf("MinimumPrice")].ToString()),
+                        MaximumPrice = int.Parse(sqlResult.ItemArray[dt.Columns.IndexOf("MaximumPrice")].ToString()),
+                        BedroomCount = int.Parse(sqlResult.ItemArray[dt.Columns.IndexOf("Bedrooms")].ToString()),
+                        BathroomCount = int.Parse(sqlResult.ItemArray[dt.Columns.IndexOf("Bathrooms")].ToString()),
+                        CarparkCount = int.Parse(sqlResult.ItemArray[dt.Columns.IndexOf("CarSpaces")].ToString()),
+                        AreaSquareMeters = int.Parse(sqlResult.ItemArray[dt.Columns.IndexOf("AreaSquareMeters")].ToString()),
+                        CouncilRates = int.Parse(sqlResult.ItemArray[dt.Columns.IndexOf("CouncilRates")].ToString()),
+                        WaterRates = int.Parse(sqlResult.ItemArray[dt.Columns.IndexOf("WaterRates")].ToString()),
+                        StrataFess = int.Parse(sqlResult.ItemArray[dt.Columns.IndexOf("StrataFees")].ToString())
+                    }
+                );
+            }
+
+            var pageCount = 1;
+            for (int currentPage = 1; currentPage <= pageCount; currentPage++)
+            {
+                var url = $"{lucasResultsUrl}&pg={currentPage}";
+
+                var httpClient = new HttpClient();
+                httpClient.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("Mozilla", "5.0"));
+                httpClient.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("(Windows NT 10.0; Win64; x64)"));
+
+                var lucasResponse = await httpClient.GetAsync(url);
+                var lucasHtml = lucasResponse.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+
+                if (pageCount == 1)
+                {
+                    var propertyCount = int.Parse(lucasHtml.Split("<div class=\"heading main heading-165-878\">\n")[1].Split(" Properties Found")[0]);
+                    pageCount = (int)Math.Ceiling(propertyCount/12d);
+                }
+
+                foreach (var listedItem in lucasHtml.Split("<a class=\"listing-link\" href=\""))
+                {
+                    if (listedItem.Contains("<!DOCTYPE html>")) continue;
+
+                    var lines = listedItem.Split("\n");
+
+                    var link = "https://www.lucasre.com.au" + lines[0].Split("\"><img ")[0];
+                    var address = lines[4];
+                    var suburb = lines[7];
+                    var sqlProperty = sqlProperties.SingleOrDefault(x => x.Address == address && x.Suburb == suburb, null);
+                    var newProperty = (sqlProperty == null);
+                    if (!newProperty) sqlProperties.Remove(sqlProperty);
+                    var propertyId = newProperty ? 0 : sqlProperty.PropertyId;
+                    var oldMinPrice = 0;
+                    var oldMaxPrice = 0;
+                    var minPrice = int.Parse(lines[12].Split("-")[0].Trim().TrimStart('$').Replace(",", ""));
+                    var maxPrice = int.Parse(lines[12].Split("-")[1].Trim().TrimStart('$').Replace(",", ""));
+                    var priceChange = (!newProperty && (sqlProperty.MinimumPrice != minPrice || sqlProperty.MaximumPrice != maxPrice));
+                    if (priceChange)
+                    {
+                        oldMinPrice = sqlProperty.MinimumPrice;
+                        oldMaxPrice = sqlProperty.MaximumPrice;
+                        sqlProperty.MinimumPrice = minPrice;
+                        sqlProperty.MaximumPrice = maxPrice;
+                    }
+                    var bedroomCount = int.Parse(lines[16].Split("\">")[1].Split("</span")[0]);
+                    var bathroomCount = int.Parse(lines[20].Split("\">")[1].Split("</span")[0]);
+                    var carCount = 0;
+                    if (listedItem.Contains("<span class=\"icon icon-car\"></span>"))
+                        carCount = int.Parse(lines[24].Split("\">")[1].Split("</span")[0]);
+
+                    var lucasResponse2 = await httpClient.GetAsync(link);
+                    var lucasHtml2 = lucasResponse2.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+
+                    var sizeMetresSquared = 0;
+                    if (lucasHtml2.Contains("<span class=\"detail-title\">Total Size</span>"))
+                        sizeMetresSquared = int.Parse(lucasHtml2.Split("Total Size</span>\n<span class=\"detail-text\">")[1].Split("m<sup>")[0].Replace(",", ""));
+                    var councilRates = GetFeesPerAnnum(lucasHtml2, "Council Rates");
+                    var waterRates = GetFeesPerAnnum(lucasHtml2, "Water Rates"); 
+                    var strataFees = GetFeesPerAnnum(lucasHtml2, "Strata Fees");
+
+                    var oldStatus = "";
+                    var status = "Active";
+                    if (sizeMetresSquared == 0 || councilRates == 0 || waterRates == 0 || strataFees == 0)
+                    {
+                        status = "MissingInfo";
+                    } else if (lucasHtml2.Contains("<div class=\"main-badge large\">"))
+                    {
+                        status = $"Badge:{lucasHtml2.Split("<div class=\"main-badge large\">")[1].Split("</div>")[0]}";
+                    }
+
+                    var statusUpdate = (!newProperty && status != sqlProperty.Status);
+                    if (statusUpdate)
+                    {
+                        oldStatus = status;
+                        sqlProperty.Status = status;
+                    }
+
+                    if (newProperty) sqlProperty =
+                        new LucasItem
+                        {
+                            PropertyId = propertyId,
+                            Address = address,
+                            Suburb = suburb,
+                            WebsiteLink = link,
+                            Status = status,
+                            MinimumPrice = minPrice,
+                            MaximumPrice = maxPrice,
+                            BedroomCount = bedroomCount,
+                            BathroomCount = bathroomCount,
+                            CarparkCount = carCount,
+                            AreaSquareMeters = sizeMetresSquared,
+                            CouncilRates = councilRates,
+                            WaterRates = waterRates,
+                            StrataFess = strataFees
+                        };
+
+                    if (newProperty || priceChange || statusUpdate)
+                    {
+                        if (newProperty)
+                        {
+                            priceChange = true;
+                            statusUpdate = true;
+
+                            var query = $"insert into Property values ('{address}', '{suburb}', '{link}', {bedroomCount}, {bathroomCount}, {carCount}, {sizeMetresSquared}, {councilRates}, {waterRates}, {strataFees})";
+                            QuerySql(query);
+
+                            query = $"select PropertyId from Property where Address = '{address}' and Suburb = '{suburb}'";
+                            propertyId = int.Parse(QuerySql(query).AsEnumerable().First().ItemArray[0].ToString());
+                        }
+                        if (priceChange) QuerySql($"insert into PriceHistory values ({minPrice}, {maxPrice}, {propertyId})");
+                        if (statusUpdate) QuerySql($"insert into StatusHistory values ('{status}', {propertyId})");
+                        changedSqlProperties.Add((newProperty, oldMinPrice, minPrice, oldMaxPrice, maxPrice, oldStatus, status, sqlProperty));
+                    }
+                }
+            }
+
+            foreach (var unlistedProperty in sqlProperties)
+            {
+                QuerySql($"insert into StatusHistory values ('Inactive', {unlistedProperty.PropertyId})");
+                changedSqlProperties.Add((false, 0, 0, 0, 0, unlistedProperty.Status, "Inactive", unlistedProperty));
+            }
+
+            var changes = "";
+            if (changedSqlProperties.Count > 0)
+            {
+                if (changedSqlProperties.Exists(x => x.newStatus == "Inactive")) changes += "\\nNow Inactive:\\n";
+                foreach (var (_, _, _, _, _, _, _, property) in changedSqlProperties.Where(x => x.newStatus == "Inactive"))
+                {
+                    changes += $"{property.Address}, {property.Suburb}: ${property.MinimumPrice} - ${property.MaximumPrice} ({property.WebsiteLink})\\n";
+                }
+
+                if (changedSqlProperties.Exists(x => x.newStatus != "Inactive" && !x.newProperty)) changes += "\\nUpdated Properties:\\n";
+                foreach (var (_, oldMin, newMin, oldMax, newMax, oldStatus, newStatus, property) in changedSqlProperties.Where(x => x.newStatus != "Inactive" && !x.newProperty))
+                {
+                    changes += $"{property.Address}, {property.Suburb}: ";
+                    if (oldStatus != "")
+                    {
+                        changes += $"From '{oldStatus}' to '{newStatus}'";
+                    }
+                    if (oldMin != 0)
+                    {
+                        if (oldStatus != "") changes += " and ";
+                        changes += $"From ${oldMin} - ${oldMax} to ${newMin} - ${newMax}";
+                    }
+                    changes += $" ({property.WebsiteLink})\\n";
+                }
+
+                if (changedSqlProperties.Exists(x => x.newStatus != "Inactive" && x.newProperty)) changes += "\\nNew Properties:\\n";
+                foreach (var (_, _, newMin, _, newMax, _, newStatus, property) in changedSqlProperties.Where(x => x.newStatus != "Inactive" && x.newProperty))
+                {
+                    changes += $"{property.Address}, {property.Suburb}: ${newMin} - ${newMax} for {property.AreaSquareMeters} square meters ({property.WebsiteLink})\\n";
+                }
+
+                changes += $"\\nCheck out all the properties here: {lucasResultsUrl}";
+
+                await PingDiscord($"there have been changes:\\n{changes}");
+            }
+            return changes;
+        }
+
+        public static async Task PingDiscord(string message)
+        {
+            var url = "https://discord.com/api/webhooks/1048797180028276786/VsXK0O1fL80zG6QIKHHhE5kOG9jw-2P1qnSLEN7nGOh41SGCsUWjCEmc0IeCV-P-lFq0";
+            var jsonBody = $"{{\"content\":\"<@165680911189409792>, {message}\"}}";
+            var output = await new HttpClient().PostAsync(url, new StringContent(jsonBody, Encoding.UTF8, "application/json"));
+            //Console.WriteLine(output);
         }
     }
 

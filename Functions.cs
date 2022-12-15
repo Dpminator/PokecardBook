@@ -13,18 +13,21 @@ namespace Pokebook
     {
         [FunctionName("GetPokemonCardImage")]
         public static async Task<FileContentResult> GetPokemonCardImage(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "card-image/{set}/{number}")] HttpRequest req, Microsoft.Azure.WebJobs.ExecutionContext exeCon,
+            [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "card-image/{set}/{number}")] HttpRequest req, ExecutionContext exeCon,
             string set, string number)
         {
             var urls = new List<string>()
             {
                 PokecardSlot.GetPokecardImageUrl(set, number),
                 PokecardSlot.GetPokecardImageUrl2(set, number),
+                PokecardSlot.GetPokecardImageUrlZenith(set, number),
+                PokecardSlot.GetPokecardImageUrlZenith2(set, number),
                 "https://www.mypokecard.com/en/Gallery/my/galery/5c4Z3OUCKurc.jpg"
             };
 
             foreach (var url in urls)
             {
+                if (url == "") continue;
                 var imageResponse = await new HttpClient().GetAsync(url);
                 if (imageResponse.IsSuccessStatusCode) 
                     return new FileContentResult(await (imageResponse).Content.ReadAsByteArrayAsync(), "image/jpeg");
@@ -35,11 +38,25 @@ namespace Pokebook
 
         [FunctionName("GetPokemonEbayPrices")]
         public static async Task<OkObjectResult> GetPokemonCardEbayResults(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "ebay-prices/{set}/{number}")] HttpRequest req, Microsoft.Azure.WebJobs.ExecutionContext exeCon,
+            [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "ebay-prices/{set}/{number}")] HttpRequest req, ExecutionContext exeCon,
             string set, string number)
         {
             var json = await EbayHelper.GetPokecardEbayPrices(set, number);
             return new OkObjectResult(json);
+        }
+
+        [FunctionName("GetLucasProperties")]
+        public static async Task CheckLucasPropertiesUpdates([TimerTrigger("0 */15 * * * *")] TimerInfo myTimer)
+        {
+            await LucasHelper.SetUpDatabaseTables();
+            await LucasHelper.UpdateLucasProperties();
+        }
+
+        [FunctionName("DomTest")]
+        public static async Task<OkObjectResult> Test([HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "dom-test")] HttpRequest req, ExecutionContext exeCon)
+        {
+            var test = "TEST";
+            return new OkObjectResult(test);
         }
 
         [FunctionName("PokemonBook")]
@@ -54,7 +71,7 @@ namespace Pokebook
 
         [FunctionName("UpdateBook")]
         public static async Task<ContentResult> UpdateBook(
-           [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "update-book")] HttpRequest req, Microsoft.Azure.WebJobs.ExecutionContext exeCon,
+           [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "update-book")] HttpRequest req, ExecutionContext exeCon,
             [Table("PokecardSlot")] CloudTable pokecardSlotTable, [Table("PokecardBook")] CloudTable pokecardBookTable)
         {
             var bookName = req.Query["book"].ToString(); 
