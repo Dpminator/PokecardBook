@@ -432,12 +432,12 @@ namespace Pokebook
                     changes += $"{property.Address}, {property.Suburb}: ";
                     if (oldStatus != "")
                     {
-                        changes += $"From '{oldStatus}' to '{newStatus}'";
+                        changes += $"From status '{oldStatus}' to '{newStatus}'";
                     }
                     if (oldMin != 0)
                     {
                         if (oldStatus != "") changes += " and ";
-                        changes += $"From ${oldMin} - ${oldMax} to ${newMin} - ${newMax}";
+                        changes += $"From price range ${oldMin} - ${oldMax} to ${newMin} - ${newMax}";
                     }
                     changes += $" ({property.WebsiteLink})\\n\\n";
                 }
