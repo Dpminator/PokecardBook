@@ -359,7 +359,12 @@ namespace Pokebook
                     var status = "Active";
                     if (sizeMetresSquared == 0 || councilRates == 0 || waterRates == 0 || strataFees == 0)
                     {
-                        status = "MissingInfo";
+                        var missingInfoText = "";
+                        if (sizeMetresSquared == 0) missingInfoText += "size,";
+                        if (councilRates == 0) missingInfoText += "council,";
+                        if (waterRates == 0) missingInfoText += "water,";
+                        if (strataFees == 0) missingInfoText += "strata";
+                        status = $"MissingInfo:{missingInfoText.TrimEnd(',')}";
                     } else if (lucasHtml2.Contains("<div class='main-badge large'>"))
                     {
                         status = $"Badge:{lucasHtml2.Split("<div class='main-badge large'>")[1].Split("</div>")[0].Trim()}";
