@@ -215,7 +215,7 @@ namespace Pokebook
             public int StrataFess { get; set; }
         }
 
-        private static readonly string sqlConnString = System.Environment.GetEnvironmentVariable("LucasDbConnString");
+        private static readonly string sqlConnString = Environment.GetEnvironmentVariable("LucasDbConnString");
         private static readonly string lucasResultsUrl = "https://www.lucasre.com.au/pages/real-estate/results?listing_sale_method=Sale&status=&display_sale_method=BUY&listing_suburb_search=Docklands%2C+VIC+3008%3B+&listing_category=&listing_price_from=450000&listing_price_to=650000&listing_bedrooms=2&listing_bathrooms=1&surrounds=false";
 
         private static DataTable QuerySql(string query)
@@ -459,7 +459,7 @@ namespace Pokebook
 
         public static async Task PingDiscord(string message)
         {
-            var url = "https://discord.com/api/webhooks/1048797180028276786/VsXK0O1fL80zG6QIKHHhE5kOG9jw-2P1qnSLEN7nGOh41SGCsUWjCEmc0IeCV-P-lFq0";
+            var url = Environment.GetEnvironmentVariable("DiscordWebhookUrl"); ;
             var jsonBody = $"{{\"content\":\"<@165680911189409792>, {message}\"}}";
             var output = await new HttpClient().PostAsync(url, new StringContent(jsonBody, Encoding.UTF8, "application/json"));
             //Console.WriteLine(output);
