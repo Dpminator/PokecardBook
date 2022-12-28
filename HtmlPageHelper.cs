@@ -216,7 +216,11 @@ namespace Pokebook
         }
 
         private static readonly string sqlConnString = Environment.GetEnvironmentVariable("LucasDbConnString");
-        private static readonly string lucasResultsUrl = "https://www.lucasre.com.au/pages/real-estate/results?listing_sale_method=Sale&status=&display_sale_method=BUY&listing_suburb_search=Docklands%2C+VIC+3008%3B+&listing_category=&listing_price_from=450000&listing_price_to=650000&listing_bedrooms=2&listing_bathrooms=1&surrounds=false";
+        private static readonly int urlMinnimumPrice = 400000;
+        private static readonly int urlMaximumPrice = 650000;
+        private static readonly int urlMinnimumBedrooms = 2;
+        private static readonly int urlMinnimumBathrooms = 1;
+        private static readonly string lucasResultsUrl = $"https://www.lucasre.com.au/pages/real-estate/results?listing_sale_method=Sale&status=&display_sale_method=BUY&listing_suburb_search=Docklands%2C+VIC+3008%3B+&listing_category=&listing_price_from={urlMinnimumPrice}&listing_price_to={urlMaximumPrice}&listing_bedrooms={urlMinnimumBedrooms}&listing_bathrooms={urlMinnimumBathrooms}&surrounds=false";
 
         private static DataTable QuerySql(string query)
         {
@@ -402,8 +406,8 @@ namespace Pokebook
                             query = $"select PropertyId from Property where Address = '{address}' and Suburb = '{suburb}'";
                             propertyId = int.Parse(QuerySql(query).AsEnumerable().First().ItemArray[0].ToString());
                         }
-                        if (priceChange) QuerySql($"insert into PriceHistory values ({minPrice}, {maxPrice}, {propertyId}, CURRENT_TIMESTAMP)");
-                        if (statusUpdate) QuerySql($"insert into StatusHistory values ('{status}', {propertyId}, CURRENT_TIMESTAMP)");
+                        if (priceChange) QuerySql($"insert into PriceHistory values ({minPrice}, {maxPrice}, {propertyId}, current_timestamp)");
+                        if (statusUpdate) QuerySql($"insert into StatusHistory values ('{status}', {propertyId}, current_timestamp)");
                         changedSqlProperties.Add((newProperty, oldMinPrice, minPrice, oldMaxPrice, maxPrice, oldStatus, status, sqlProperty));
                     }
                 }
