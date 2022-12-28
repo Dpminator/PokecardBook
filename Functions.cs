@@ -7,6 +7,7 @@ using System.Net.Http;
 using Microsoft.Azure.Cosmos.Table;
 using System.Collections.Generic;
 using System.Linq;
+using System;
 
 namespace Pokebook
 {
@@ -51,10 +52,16 @@ namespace Pokebook
         }
 
         [FunctionName("GetLucasProperties")]
-        public static async Task CheckLucasPropertiesUpdates([TimerTrigger("0 */15 * * * *")] TimerInfo myTimer)
+        public static async Task CheckLucasPropertiesUpdates([TimerTrigger("0 */30 * * * *")] TimerInfo myTimer)
         {
-            await LucasHelper.SetUpDatabaseTables();
-            await LucasHelper.UpdateLucasProperties();
+            try
+            {
+                await LucasHelper.SetUpDatabaseTables();
+                await LucasHelper.UpdateLucasProperties();
+            } catch (Exception e)
+            {
+                await LucasHelper.PingDiscord($"An Error has occured:\\n{e}");
+            }
         }
 
         [FunctionName("DomTest")]

@@ -305,21 +305,17 @@ namespace Pokebook
                 var lucasResponse = await httpClient.GetAsync(url);
                 var lucasHtml = lucasResponse.Content.ReadAsStringAsync().GetAwaiter().GetResult();
 
-                if (pageCount == 1)
-                {
-                    var propertyCount = int.Parse(lucasHtml.Split("<div class=\"heading main heading-165-878\">\n")[1].Split(" Properties Found")[0]);
-                    pageCount = (int)Math.Ceiling(propertyCount/12d);
-                }
+                if (lucasHtml.Contains("load more")) pageCount++;
 
-                foreach (var listedItem in lucasHtml.Split("<a class=\"listing-link\" href=\""))
+                foreach (var listedItem in lucasHtml.Split("<div class=\"listing-wrapper\">")[1].Split("<a href=\""))
                 {
-                    if (listedItem.Contains("<!DOCTYPE html>")) continue;
+                    if (!listedItem.Contains("class=\"listing\"")) continue;
 
                     var lines = listedItem.Split("\n");
 
-                    var link = "https://www.lucasre.com.au" + lines[0].Split("\"><img ")[0];
-                    var address = lines[4];
-                    var suburb = lines[7];
+                    var link = "https://www.lucasre.com.au" + lines[0].Split("\"")[0];
+                    var address = lines[6];
+                    var suburb = lines[9];
                     var sqlProperty = sqlProperties.SingleOrDefault(x => x.Address == address && x.Suburb == suburb, null);
                     var newProperty = (sqlProperty == null);
                     if (!newProperty) sqlProperties.Remove(sqlProperty);
@@ -336,11 +332,11 @@ namespace Pokebook
                         sqlProperty.MinimumPrice = minPrice;
                         sqlProperty.MaximumPrice = maxPrice;
                     }
-                    var bedroomCount = int.Parse(lines[16].Split("\">")[1].Split("</span")[0]);
-                    var bathroomCount = int.Parse(lines[20].Split("\">")[1].Split("</span")[0]);
+                    var bedroomCount = int.Parse(lines[17].Split("</span>")[1]);
+                    var bathroomCount = int.Parse(lines[20].Split("</span>")[1]);
                     var carCount = 0;
-                    if (listedItem.Contains("<span class=\"icon icon-car\"></span>"))
-                        carCount = int.Parse(lines[24].Split("\">")[1].Split("</span")[0]);
+                    if (listedItem.Contains("<span class=\"icon-car\"></span>"))
+                        carCount = int.Parse(lines[23].Split("</span>")[1]);
 
                     var lucasResponse2 = await httpClient.GetAsync(link);
                     var lucasHtml2 = lucasResponse2.Content.ReadAsStringAsync().GetAwaiter().GetResult();
@@ -406,8 +402,8 @@ namespace Pokebook
                             query = $"select PropertyId from Property where Address = '{address}' and Suburb = '{suburb}'";
                             propertyId = int.Parse(QuerySql(query).AsEnumerable().First().ItemArray[0].ToString());
                         }
-                        if (priceChange) QuerySql($"insert into PriceHistory values ({minPrice}, {maxPrice}, {propertyId})");
-                        if (statusUpdate) QuerySql($"insert into StatusHistory values ('{status}', {propertyId})");
+                        if (priceChange) QuerySql($"insert into PriceHistory values ({minPrice}, {maxPrice}, {propertyId}, CURRENT_TIMESTAMP)");
+                        if (statusUpdate) QuerySql($"insert into StatusHistory values ('{status}', {propertyId}, CURRENT_TIMESTAMP)");
                         changedSqlProperties.Add((newProperty, oldMinPrice, minPrice, oldMaxPrice, maxPrice, oldStatus, status, sqlProperty));
                     }
                 }
