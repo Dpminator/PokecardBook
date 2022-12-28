@@ -171,10 +171,8 @@ namespace Pokebook
             var ebayResponse = await new HttpClient().GetAsync(url);
             var ebayHtml = ebayResponse.Content.ReadAsStringAsync().GetAwaiter().GetResult();
 
-            var itemCount = 0;
-            foreach (var listedItem in ebayHtml.Split("s-item s-item__pl-on-bottom s-item--watch-at-corner"))
+            foreach (var listedItem in ebayHtml.Split("s-item s-item__pl-on-bottom"))
             {
-                if (itemCount == 5) break;
                 if (listedItem.Contains("<span role=heading aria-level=3>"))
                 {
                     var name = listedItem.Split("<span role=heading aria-level=3>")[1].Split("</span>")[0];
@@ -190,7 +188,6 @@ namespace Pokebook
                         var ebayLinkToItem = listedItem.Split("class=s-item__link href=")[1].Split("?")[0];
 
                         ebayItems.Add(new EbayItem { Name = name, Price = totalPrice, Link = ebayLinkToItem});
-                        itemCount++;
                     }
                 }
             }

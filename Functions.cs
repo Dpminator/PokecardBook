@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using System.Net.Http;
 using Microsoft.Azure.Cosmos.Table;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Pokebook
 {
@@ -37,12 +38,16 @@ namespace Pokebook
         }
 
         [FunctionName("GetPokemonEbayPrices")]
-        public static async Task<OkObjectResult> GetPokemonCardEbayResults(
+        public static async Task<ActionResult> GetPokemonCardEbayResults(
             [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "ebay-prices/{set}/{number}")] HttpRequest req, ExecutionContext exeCon,
             string set, string number)
         {
-            var json = await EbayHelper.GetPokecardEbayPrices(set, number);
-            return new OkObjectResult(json);
+            var json = (await EbayHelper.GetPokecardEbayPrices(set, number))
+                .Take(req.Query["resultsCount"].Count > 0 && int.TryParse(req.Query["resultsCount"].ToString(), out int rc) ? rc : 5);
+
+            if (req.Query["json"].Count > 0) return new OkObjectResult(json);
+
+            return new ContentResult { Content = string.Join("", json.Select(x => $"<p>${x.Price:N2} <a href='{x.Link}'>{x.Name}</a></p>")), ContentType = "text/html" };
         }
 
         [FunctionName("GetLucasProperties")]
