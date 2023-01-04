@@ -35,7 +35,7 @@ namespace Pokebook
                     return new FileContentResult(await (imageResponse).Content.ReadAsByteArrayAsync(), "image/jpeg");
             }
 
-            return new FileContentResult(new byte[0], "image/jpeg"); 
+            return new FileContentResult(Array.Empty<byte>(), "image/jpeg"); 
         }
 
         [FunctionName("GetPokemonEbayPrices")]
@@ -48,7 +48,7 @@ namespace Pokebook
 
             if (req.Query["json"].Count > 0) return new OkObjectResult(json);
 
-            return new ContentResult { Content = string.Join("", json.Select(x => $"<p>${x.Price:N2} <a href='{x.Link}'>{x.Name}</a></p>")), ContentType = "text/html" };
+            return new ContentResult { Content = string.Join("", json.Select(x => $"<p>${x.Price:N2} <a href='{x.Link}' target='_blank'>{x.Name}</a></p>")), ContentType = "text/html" };
         }
 
         [FunctionName("GetLucasProperties")]

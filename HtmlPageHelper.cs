@@ -104,11 +104,13 @@ namespace Pokebook
             content += "<button class ='buttonlayout' id='SwapCard' onclick='SwapCardButton()' disabled>Swap Card</button><br><br>";
             content += "</div><br><br><br>";
 
-            content += "<div class ='Boxdesign'>";
-            content += "<h3>Updated Cards:</h3>";
-            content += "<ul id='UpdatedCardsList'></ul><br>";
-            content += "<button class ='buttonlayout' id='UndoUpdates' onclick='UndoAllUpdates()' disabled>Undo All Updates</button><br><br>";
-            content += "<button class ='buttonlayout' id='SaveUpdates' onclick='SaveUpdates()' disabled>Save Updates</button><br><br>";
+            content += "<div class ='Boxdesign' style='visibility:visible' id='CardDetailsDiv'>";
+            content += "<h3>Card Details:</h3>";
+            content += "Set Name: <input id='CardDetailSetName' style='width:140;' disabled value='NONE'><br>";
+            content += "Card Number: <input id='CardDetailCardNumber' style='width:116;' disabled value='0'><br><br>";
+            content += "<button class ='buttonlayout' id='OpenCardImage' onclick='OpenCardImage()'>Open Card's Image</button><br>";
+            content += "<button class ='buttonlayout' id='OpenCardEbayPrices' onclick='OpenCardEbayPrices()'>See Card's Ebay Prices</button><br><br>";
+            content += "<div id ='EbayPricesDiv'></div><br><br>";
             content += "</div><br><br><br>";
 
             content += "</div>";
@@ -136,13 +138,26 @@ namespace Pokebook
 
                         var url = $"/api/card-image/{set}/{cardNumber.Replace("/", "-")}";
                         var clickAction = page == 0 || page == PageCount + 1 ? "" : $"onclick=\"SelectCard({page}, {slot}, '{set.Replace("'", "\\'")}', '{cardNumber}')\"";
-                        content += $"<td><img class='PokemonCardCell' id='Cell_{page}_{slot}' src=\"{url.Replace("'", "&#39;")}\" {clickAction}></td>";
+                        content += $"<td><img class='PokemonCardCell' id='Cell_{page}_{slot}' data-src=\"{url.Replace("'", "&#39;")}\" {clickAction}></td>";
                     }
                     content += "</tr>";
                 }
                 content += "</table></div>";
             }
             content += "</div>";
+
+
+            content += "<div style='float:left;width:300;margin-right:15px;'>";
+
+            content += "<div class ='Boxdesign' style='visibility:hidden' id='UpdatedCardsDiv'>";
+            content += "<h3>Updated Cards:</h3>";
+            content += "<ul id='UpdatedCardsList'></ul><br>";
+            content += "<button class ='buttonlayout' id='UndoUpdates' onclick='UndoAllUpdates()' disabled>Undo All Updates</button><br><br>";
+            content += "<button class ='buttonlayout' id='SaveUpdates' onclick='SaveUpdates()' disabled>Save Updates</button><br><br>";
+            content += "</div><br><br><br>";
+
+            content += "</div>";
+
 
             return content;
         }
