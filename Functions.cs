@@ -85,21 +85,27 @@ namespace Pokebook
            [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "update-book")] HttpRequest req, ExecutionContext exeCon,
             [Table("PokecardSlot")] CloudTable pokecardSlotTable, [Table("PokecardBook")] CloudTable pokecardBookTable)
         {
-            var bookName = req.Query["book"].ToString(); 
-            var listOfUpdates = req.Query["updates"].ToString().TrimEnd(',');
-            await PokecardSlot.InjectUpdates(pokecardSlotTable, listOfUpdates, bookName);
+            var bookName = req.Query["book"].ToString();
 
-            var newPageCount = req.Query["pages"].ToString();
-            if (newPageCount != "")
+            var currentEpochTicks = DateTime.UtcNow.Ticks - DateTime.Parse("1970-01-01 00:00:00").Ticks;
+            if (req.Query["nonce"].Count > 0 && long.TryParse(req.Query["nonce"].ToString(), out long nonce) && nonce > (currentEpochTicks - 1000000) && nonce < (currentEpochTicks + 50000000))
             {
-                await pokecardBookTable.ExecuteAsync(TableOperation.InsertOrMerge(new PokecardBook
+                var listOfUpdates = req.Query["updates"].ToString().TrimEnd(',');
+                await PokecardSlot.InjectUpdates(pokecardSlotTable, listOfUpdates, bookName);
+
+                var newPageCount = req.Query["pages"].ToString();
+                if (newPageCount != "")
                 {
-                    ETag = "*",
-                    PartitionKey = bookName,
-                    RowKey = bookName,
-                    PageCount = newPageCount
-                }));
+                    await pokecardBookTable.ExecuteAsync(TableOperation.InsertOrMerge(new PokecardBook
+                    {
+                        ETag = "*",
+                        PartitionKey = bookName,
+                        RowKey = bookName,
+                        PageCount = newPageCount
+                    }));
+                }
             }
+            else Console.WriteLine("Nonce failed");
 
             var html = $"<!DOCTYPE html><html><head><meta http-equiv=\"refresh\" content=\"0; url=http{(req.IsHttps ? "s" : "")}://{req.Host.Value}/api/pokemon-book?book={bookName}\"/></head></html>";
             return new ContentResult { Content = html, ContentType = "text/html" };

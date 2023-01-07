@@ -111,13 +111,16 @@
         var pageCount = 12
         var swapCardMode = false
 
-        function SaveUpdates() {
+        async function SaveUpdates() {
             var newBook = bookName == ""
             bookName = document.getElementById("BookNameInput").value
             var newPageCount = parseInt(document.getElementById("PageCountInput").value)
             if (newPageCount % 2 == 1) newPageCount += 1
             var pageCountChange = newPageCount != pageCount || newBook ? ("&pages=" + newPageCount) : ""
-            var url = '/api/update-book?updates=' + listOfChanges + '&book=' + bookName + pageCountChange
+            var timeJson = await(await fetch("https://worldtimeapi.org/api/timezone/Etc/UTC", { method: "GET" })).json()
+            var nonceNumber = (new Date(timeJson.datetime)).getTime() * 10000
+            var nonce = '&nonce=' + nonceNumber
+            var url = '/api/update-book?updates=' + listOfChanges + '&book=' + bookName + pageCountChange + nonce
             window.location.href = url;
         }
 
