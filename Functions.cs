@@ -23,7 +23,6 @@ namespace Pokebook
                 PokecardSlot.GetPokecardImageUrl(set, number),
                 PokecardSlot.GetPokecardImageUrl2(set, number),
                 PokecardSlot.GetPokecardImageUrlZenith(set, number),
-                PokecardSlot.GetPokecardImageUrlZenith2(set, number),
                 "https://www.mypokecard.com/en/Gallery/my/galery/5c4Z3OUCKurc.jpg"
             };
 

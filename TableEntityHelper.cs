@@ -1,5 +1,7 @@
 ﻿using Microsoft.Azure.Cosmos.Table;
 using System;
+using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Threading.Tasks;
 
 namespace Pokebook
@@ -189,27 +191,49 @@ namespace Pokebook
 
         public static string GetPokecardImageUrlZenith(string cardSet, string cardNumber)
         {
-            if (cardSet == "Crown Zenith" && cardNumber.StartsWith("JP"))
-                return $"https://www.serebii.net/card/vstaruniverse/{cardNumber.Replace("JP", "")}.jpg";
-            return "";
-        }
-
-        public static string GetPokecardImageUrlZenith2(string cardSet, string cardNumber)
-        {
-            if (cardSet != "Crown Zenith" || !cardNumber.StartsWith("JP")) return "";
-
-            return cardNumber.Replace("JP", "") switch
+            if (cardSet == "Promo" && (cardNumber.Contains("282") || cardNumber.Contains("283") || cardNumber.Contains("284")))
             {
-                "185" => "https://www.pokebeach.com/news/2022/11/Deoxys-Art-Rare.jpg",
-                "173" => "https://www.pokebeach.com/news/2022/11/Voltorb-Art-Rare.jpg",
-                "193" => "https://www.pokebeach.com/news/2022/11/Magnezone-Art-Rare.jpg",
-                "266" => "https://www.pokebeach.com/news/2022/11/Elesas-Sparkle-Full-Art.png",
-                "245" => "https://www.pokebeach.com/news/2022/11/Volo-Full-Art.png",
-                "249" => "https://www.pokebeach.com/news/2022/11/Hisui-Friends.jpg",
-                "247" => "https://www.pokebeach.com/news/2022/11/Sinnoh-Friends.jpg",
-                "195" => "https://www.pokebeach.com/news/2022/11/Latias-Art-Rare-2.png",
-                _ =>  ""
-            };
+                cardNumber = cardNumber.ToLower();
+                if (cardNumber.StartsWith("swsh")) cardNumber = cardNumber.Split("swsh")[1];
+                if (!int.TryParse(cardNumber, out int cn)) return "";
+                return cn switch
+                {
+                    282 => "https://images.squarespace-cdn.com/content/v1/5cf4cfa4382ac0000123aa1b/1667538693127-3437AP6P3L1IDBLRPS9D/IMG_2953.png",
+                    283 => "https://images.squarespace-cdn.com/content/v1/5cf4cfa4382ac0000123aa1b/1667538677264-L5TUK3EFQ6CK1U6KOODJ/IMG_2952.png",
+                    284 => "https://images.squarespace-cdn.com/content/v1/5cf4cfa4382ac0000123aa1b/1667538683191-FKALAQS7LI9FFLGASSFN/IMG_2954.png",
+                    _ => "",
+                };
+            }
+
+            if (cardSet != "Crown Zenith") return "";
+
+            if (cardNumber.ToLower().StartsWith("gg"))
+            {
+                if (!int.TryParse(cardNumber.ToLower().Split("gg")[1], out int cn)) return "";
+
+                var httpClient = new HttpClient();
+                httpClient.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("Mozilla", "5.0"));
+                httpClient.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("(Windows NT 10.0; Win64; x64)"));
+
+                var html = httpClient.GetAsync("https://www.justinbasil.com/visual/ss125").GetAwaiter().GetResult()
+                    .Content
+                    .ReadAsStringAsync().GetAwaiter().GetResult();
+
+                return html.Split("<div class=\"sqs-gallery\">")[13].Split("<noscript><img src=\"")[cn].Split("\"")[0];
+            }
+            else
+            {
+                if (!int.TryParse(cardNumber, out int cn)) return "";
+                return cn switch
+                {
+                    147 => "https://images.squarespace-cdn.com/content/v1/5cf4cfa4382ac0000123aa1b/1672783150367-351N529R8A01THQPG816/IMG_3432.jpeg",
+                    148 => "https://images.squarespace-cdn.com/content/v1/5cf4cfa4382ac0000123aa1b/1669912687661-01M1CHWY45VR286DDNMC/249.jpg",
+                    149 => "https://images.squarespace-cdn.com/content/v1/5cf4cfa4382ac0000123aa1b/1669912686925-W8EMP0V2SFUBSV8OQPPG/247.jpg",
+                    150 => "https://images.squarespace-cdn.com/content/v1/5cf4cfa4382ac0000123aa1b/1669912687247-MC3RAHDZRJMJK06AFTOZ/248-1.jpg",
+                    151 => "https://images.squarespace-cdn.com/content/v1/5cf4cfa4382ac0000123aa1b/1669912686230-YUVGTL0QAGGGTAAOKPR7/245.jpg",
+                    _ => "",
+                };
+            }
         }
     }
 
