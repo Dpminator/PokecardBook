@@ -191,6 +191,13 @@
             var borderColour = document.getElementById("UpdateCard").disabled ? "forestgreen" : "coral"
             document.getElementById("SelectedCard").style.borderColor = borderColour
             document.getElementById("SelectedCard").style.boxShadow = "-0.5px -0.5px 4px 3px " + borderColour + ", 0.5px 0.5px 4px 3px " + borderColour
+
+            document.getElementById("SwapCard").disabled = !(document.getElementById("UpdateCard").disabled)
+            if (swapCardMode && document.getElementById("SwapCard").disabled)
+            {
+                document.getElementById("SwapCard").innerHTML = "Swap Card"
+                swapCardMode = false
+            }
         }
 
         function BeautifySetName(setName) {
@@ -274,12 +281,21 @@
             document.getElementById("ClearSelection").disabled = false
             document.getElementById("SwapCard").disabled = false
             document.getElementById("UpdateCard").disabled = true
-            document.getElementById("SelectedCard").style.left = document.getElementById("Cell_" + selectedPage + "_" + selectedSlot).getBoundingClientRect().left - 7
-            document.getElementById("SelectedCard").style.top = document.getElementById("Cell_" + selectedPage + "_" + selectedSlot).getBoundingClientRect().top - 7
+            SetSelectedCardPosition()
             document.getElementById("SelectedCard").style.visibility = "visible"
             document.getElementById("SelectedCard").style.borderColor = "forestgreen"
             document.getElementById("SelectedCard").style.boxShadow = "-0.5px -0.5px 4px 3px forestgreen, 0.5px 0.5px 4px 3px forestgreen"
         }
+
+        function SetSelectedCardPosition(scroll = false) {
+            if (selectedSlot != "0")
+            {
+                document.getElementById("SelectedCard").style.left = document.getElementById("Cell_" + selectedPage + "_" + selectedSlot).getBoundingClientRect().left - 7
+                document.getElementById("SelectedCard").style.top = document.getElementById("Cell_" + selectedPage + "_" + selectedSlot).getBoundingClientRect().top - (scroll ? 14 : 7)
+            }
+        }
+
+        window.addEventListener('scroll', function () { SetSelectedCardPosition(true); });
 
         function SwapCardButton() {
             if (swapCardMode) {
