@@ -35,6 +35,7 @@
             font-family: "Inter";
             position: relative;
             top: -25px;
+            margin-bottom: -20px;
             background-color: white;
             width: fit-content;
             height: fit-content;
@@ -46,6 +47,10 @@
 
         h1 {
             margin: 10;
+        }
+
+        ul {
+            margin: 0;
         }
 
         #SelectedCard {
@@ -66,13 +71,10 @@
             height: 250px;
         }
 
-        .PokemonCardPageBlank {
-            padding: 10px;
-            float: left;
-        }
-
-        .PokemonCardPage {
-            padding: 10px;
+        .PokemonCardPage, .PokemonCardPageBlank {
+            padding-top: 5px;
+            padding-left: 5px;
+            padding-right: 5px;
             float: left;
         }
 
@@ -117,7 +119,7 @@
             bookName = document.getElementById("BookNameInput").value
             var newPageCount = parseInt(document.getElementById("PageCountInput").value)
             if (newPageCount % 2 == 1) newPageCount += 1
-            var pageCountChange = newPageCount != pageCount || newBook ? ("&pages=" + newPageCount) : ""
+            var pageCountChange = (newPageCount != pageCount || newBook) ? ("&pages=" + newPageCount) : ""
             var timeJson = await (await fetch("https://worldtimeapi.org/api/timezone/Etc/UTC", { method: "GET" })).json()
             var nonceNumber = (new Date(timeJson.datetime)).getTime() * 10000
             var nonce = '&nonce=' + nonceNumber
@@ -147,6 +149,7 @@
             document.getElementById("SelectedCard").style.borderColor = "forestgreen"
             document.getElementById("SelectedCard").style.boxShadow = "-0.5px -0.5px 4px 3px forestgreen, 0.5px 0.5px 4px 3px forestgreen"
             document.getElementById("UpdateCard").disabled = true
+            document.getElementById("UpdateCard").style.color = ""
             document.getElementById("Cell_" + selectedPage + "_" + selectedSlot).src = cardImageUrl;
 
             var update = selectedPage + '_' + selectedSlot + '_' + chosenSetName.toLowerCase().replace(" ", "-").replace(" ", "-").replace("'", "") + "_" + chosenCardNumber + ","
@@ -157,12 +160,16 @@
 
             document.getElementById("SaveUpdates").disabled = document.getElementById("BookNameInput").value == "" ||
                 document.getElementById("PageCountInput").value < 2 || document.getElementById("PageCountInput").value > 100
+            document.getElementById("SaveUpdates").style.color = document.getElementById("SaveUpdates").disabled ? "" : "green"
             document.getElementById("UndoUpdates").disabled = false
             document.getElementById("UpdatedCardsDiv").style.visibility = "visible"
             document.getElementById("CardDetailSetName").value = selectedSetName
             document.getElementById("CardDetailCardNumber").value = selectedCardNumber
             document.getElementById("EbayPricesDiv").innerHTML = ""
+            document.getElementById("OpenCardEbayPrices").innerHTML = "Show Card's Ebay Prices"
             document.getElementById("CardDetailsDiv").style.visibility = (selectedSetName == "NONE") ? "hidden" : "visible"
+            document.getElementById("SwapCard").disabled = false
+            document.getElementById("CardChanges").style.display = "block"
         }
 
         function BookDetailSelectorOnChange() {
@@ -176,6 +183,18 @@
                     listOfChanges != ""
                 )
             document.getElementById("SaveUpdates").disabled = !buttonActive
+            document.getElementById("SaveUpdates").style.color = buttonActive ? "green" : ""
+            if (buttonActive) document.getElementById("UpdatedCardsDiv").style.visibility = "visible"
+
+            document.getElementById("NewBookName").innerHTML = "<b>Book Name:</b> " + document.getElementById("BookNameInput").value
+            document.getElementById("NewPageCount").innerHTML = "<b>Page Count:</b> " + document.getElementById("PageCountInput").value
+            document.getElementById("NewPageCount").style.display = (document.getElementById("PageCountInput").value != pageCount || bookName == "") ? "block" : "none"
+
+            if (bookName != "")
+            {
+                var h3Title = "Updated" + (document.getElementById("PageCountInput").value != pageCount ? " Details and " : " ") + "Cards:"
+                document.getElementById("UpdatedCardsDiv").getElementsByTagName('h3')[0].innerHTML = h3Title
+            }
         }
 
         function SelectorOnChange() {
@@ -188,6 +207,7 @@
 
             document.getElementById("UpdateCard").disabled =
                 (document.getElementById("SetNameSelector").value == selectedSetName && document.getElementById("CardNumberInput").value == selectedCardNumber)
+            document.getElementById("UpdateCard").style.color = document.getElementById("UpdateCard").disabled ? "" : "green"
 
             var borderColour = document.getElementById("UpdateCard").disabled ? "forestgreen" : "coral"
             document.getElementById("SelectedCard").style.borderColor = borderColour
@@ -271,6 +291,7 @@
             document.getElementById("CardDetailSetName").value = selectedSetName
             document.getElementById("CardDetailCardNumber").value = selectedCardNumber
             document.getElementById("EbayPricesDiv").innerHTML = ""
+            document.getElementById("OpenCardEbayPrices").innerHTML = "Show Card's Ebay Prices"
             document.getElementById("CardDetailsDiv").style.visibility = (selectedSetName == "NONE") ? "hidden" : "visible"
             document.getElementById("SelectedPageNumber").value = selectedPage
             document.getElementById("SelectedSlotNumber").value = selectedSlot
@@ -279,8 +300,10 @@
             document.getElementById("SetNameSelector").disabled = false
             document.getElementById("CardNumberInput").disabled = (setName == 'NONE')
             document.getElementById("ClearSelection").disabled = false
+            document.getElementById("ClearSelection").style.color = "coral"
             document.getElementById("SwapCard").disabled = false
             document.getElementById("UpdateCard").disabled = true
+            document.getElementById("UpdateCard").style.color = ""
             SetSelectedCardPosition()
             document.getElementById("SelectedCard").style.visibility = "visible"
             document.getElementById("SelectedCard").style.borderColor = "forestgreen"
@@ -320,14 +343,17 @@
             document.getElementById("SetNameSelector").disabled = true
             document.getElementById("CardNumberInput").disabled = true
             document.getElementById("ClearSelection").disabled = true
+            document.getElementById("ClearSelection").style.color = ""
             document.getElementById("SwapCard").disabled = true
             document.getElementById("UpdateCard").disabled = true
+            document.getElementById("UpdateCard").style.color = ""
             document.getElementById("SelectedCard").style.visibility = "hidden"
             document.getElementById("SelectedCard").style.borderColor = "forestgreen"
             document.getElementById("SelectedCard").style.boxShadow = "-0.5px -0.5px 4px 3px forestgreen, 0.5px 0.5px 4px 3px forestgreen"
             document.getElementById("SwapCard").disabled = true
             document.getElementById("SwapCard").innerHTML = "Swap Card"
             document.getElementById("EbayPricesDiv").innerHTML = ""
+            document.getElementById("OpenCardEbayPrices").innerHTML = "Show Card's Ebay Prices"
             document.getElementById("CardDetailsDiv").style.visibility = "hidden"
         }
 
@@ -337,13 +363,20 @@
         }
 
         async function OpenCardEbayPrices() {
-            var ebayRestApiUrl = "/api/ebay-prices/" + document.getElementById("CardDetailSetName").value + "/" + document.getElementById("CardDetailCardNumber").value
+            if (document.getElementById("EbayPricesDiv").innerHTML == "") {
+                var ebayRestApiUrl = "/api/ebay-prices/" + document.getElementById("CardDetailSetName").value + "/" + document.getElementById("CardDetailCardNumber").value
 
-            var response = await fetch(ebayRestApiUrl + "?resultsCount=2", { method: "GET" });
-            var ebayPricesHtml = await response.text();
-            ebayPricesHtml += "<p><a href='" + ebayRestApiUrl + "' target='_blank'>More Results</a> (<a href='" + ebayRestApiUrl + "?json' target='_blank'>Json</a>)</p>"
+                var response = await fetch(ebayRestApiUrl + "?resultsCount=2", { method: "GET" });
+                var ebayPricesHtml = await response.text();
+                ebayPricesHtml += "<p><a href='" + ebayRestApiUrl + "' target='_blank'>More Results</a> (<a href='" + ebayRestApiUrl + "?json' target='_blank'>Json</a>)</p>"
 
-            document.getElementById("EbayPricesDiv").innerHTML = ebayPricesHtml
+                document.getElementById("EbayPricesDiv").innerHTML = ebayPricesHtml
+                document.getElementById("OpenCardEbayPrices").innerHTML = "Hide Card's Ebay Prices"
+            } else
+            {
+                document.getElementById("EbayPricesDiv").innerHTML = ""
+                document.getElementById("OpenCardEbayPrices").innerHTML = "Show Card's Ebay Prices"
+            }
         }
 
         function UpdatePages() {

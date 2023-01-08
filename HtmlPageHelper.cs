@@ -55,21 +55,22 @@ namespace Pokebook
 
         private async Task<string> GetPokemonBookHtml()
         {
-            var content = $"<script>bookName = \"{BookName}\"; pageCount = {PageCount};</script>";
+            var content = $"<script>bookName = \"{(NewBookFromUrl ? "" : BookName)}\"; pageCount = {PageCount};</script>";
 
-            content += "<div style='float:left;width:300;margin-right:15px;'>";
+            content += "<div style='float:left;width:300;margin-top:10px;'>";
 
+            content += "<div class ='Boxdesign'>";
             content += "<h3>Page Selector:</h3>";
-            content += "<div style='display:flex;'>";
+            content += "<div style='display:flex;justify-content:space-between;'>";
             content += "<button disabled id='PagePreviousButton' onclick=\"MovePage('previous')\">Previous</button>";
-            content += "<div id='PageNumber' style='width:100;text-align: center;'>Page <b>1</b></div>";
+            content += "<div id='PageNumber' style='text-align: center;'>Page <b>1</b></div>";
             content += "<button id='PageNextButton' onclick=\"MovePage('next')\">Next</button>";
-            content += "</div><br><br><br>";
+            content += "</div></div><br><br><br>";
 
             content += "<div class ='Boxdesign'>";
             content += "<h3>Book Details:</h3>";
             content += $"Book Name: <input id='BookNameInput' style='width:150;' onkeyup=\"BookDetailSelectorOnChange()\" {(BookName == "" ? "" : "disabled")} value='{BookName}'><br>";
-            content += $"Page Count: <input id='PageCountInput' style='width:140;' onkeyup=\"BookDetailSelectorOnChange()\" onChange=\"BookDetailSelectorOnChange()\" type='number' min='2' max='100' value='{(NewBookFromUrl ? "" : $"{PageCount}")}'><br>";
+            content += $"Page Count: <input id='PageCountInput' style='width:152;' onkeyup=\"BookDetailSelectorOnChange()\" onChange=\"BookDetailSelectorOnChange()\" type='number' min='2' max='100' value='{(NewBookFromUrl ? "" : $"{PageCount}")}'><br>";
             content += "</div><br><br><br>";
 
             content += "<div class ='Boxdesign'>";
@@ -98,10 +99,10 @@ namespace Pokebook
             content += "<option value='Silver Tempest'>Silver Tempest</option>";
             content += "<option value='Crown Zenith'>Crown Zenith</option>";
             content += "</select><br>";
-            content += "Card Number: <input id='CardNumberInput' onkeyup=\"SelectorOnChange()\" style='width:125;' disabled><br>";
-            content += "<button class ='buttonlayout' id='ClearSelection' onclick='ClearSelection()' disabled>Clear Selection</button><br><br>";
-            content += "<button class ='buttonlayout' id='UpdateCard' onclick='UpdateCard()' disabled>Update Card</button><br><br>";
-            content += "<button class ='buttonlayout' id='SwapCard' onclick='SwapCardButton()' disabled>Swap Card</button><br><br>";
+            content += "Card Number: <input id='CardNumberInput' onkeyup=\"SelectorOnChange()\" style='width:125;' disabled><br><br>";
+            content += "<button class ='buttonlayout' id='ClearSelection' onclick='ClearSelection()' disabled>Clear Selection</button><br>";
+            content += "<button class ='buttonlayout' id='UpdateCard' onclick='UpdateCard()' disabled>Update Card</button><br>";
+            content += "<button class ='buttonlayout' id='SwapCard' onclick='SwapCardButton()' disabled>Swap Card</button><br>";
             content += "</div><br><br><br>";
 
             content += "<div class ='Boxdesign' style='visibility:visible' id='CardDetailsDiv'>";
@@ -109,14 +110,14 @@ namespace Pokebook
             content += "Set Name: <input id='CardDetailSetName' style='width:140;' disabled value='NONE'><br>";
             content += "Card Number: <input id='CardDetailCardNumber' style='width:116;' disabled value='0'><br><br>";
             content += "<button class ='buttonlayout' id='OpenCardImage' onclick='OpenCardImage()'>Open Card's Image</button><br>";
-            content += "<button class ='buttonlayout' id='OpenCardEbayPrices' onclick='OpenCardEbayPrices()'>See Card's Ebay Prices</button><br><br>";
-            content += "<div id ='EbayPricesDiv'></div><br><br>";
-            content += "</div><br><br><br>";
+            content += "<button class ='buttonlayout' id='OpenCardEbayPrices' onclick='OpenCardEbayPrices()'>See Card's Ebay Prices</button><br>";
+            content += "<div id ='EbayPricesDiv'></div>";
+            content += "</div>";
 
             content += "</div>";
 
 
-            content += "<div style='float:left'>";
+            content += "<div style='float:left;margin-left:15px;margin-right:10px;margin-top:5px'>";
             for (int page = 0; page <= PageCount + 1; page++)
             {
                 content += $"<div class='{(page == 0 || page == PageCount + 1 ? "PokemonCardPageBlank" : "PokemonCardPage")}' id='PokemonCardPage{page}' style='display:inline-block;{(page == 0 || page == PageCount + 1 ? "opacity:0.3" : "")}'><table>";
@@ -147,14 +148,17 @@ namespace Pokebook
             content += "</div>";
 
 
-            content += "<div style='float:left;width:300;margin-right:15px;'>";
+            content += "<div style='float:left;width:300;margin-top:10px;'>";
 
-            content += "<div class ='Boxdesign' style='visibility:hidden' id='UpdatedCardsDiv'>";
-            content += "<h3>Updated Cards:</h3>";
+            content += $"<div class ='Boxdesign' style='visibility:{(NewBookFromUrl ? "visible" : "hidden")}' id='UpdatedCardsDiv'>";
+            content += $"<h3>Updated{(NewBookFromUrl ? " Details and " : " ")}Cards:</h3>";
+            content += $"<div id='NewBookName' style='display:{(BookName == "" ? "block" : "none")}'><b>Book Name:</b>{BookName}</div>";
+            content += $"<div id='NewPageCount' style='display:{(NewBookFromUrl ? "block" : "none")}'><b>Page Count:</b></div>";
+            content += $"<div id='CardChanges' style='display:none'><b>Card Changes:</b></div>";
             content += "<ul id='UpdatedCardsList'></ul><br>";
-            content += "<button class ='buttonlayout' id='UndoUpdates' onclick='UndoAllUpdates()' disabled>Undo All Updates</button><br><br>";
-            content += "<button class ='buttonlayout' id='SaveUpdates' onclick='SaveUpdates()' disabled>Save Updates</button><br><br>";
-            content += "</div><br><br><br>";
+            content += "<button class ='buttonlayout' id='SaveUpdates' onclick='SaveUpdates()' disabled>Save Updates</button><br>";
+            content += "<button class ='buttonlayout' id='UndoUpdates' onclick='UndoAllUpdates()' style='color:red'>Undo All Updates</button><br>";
+            content += "</div>";
 
             content += "</div>";
 
