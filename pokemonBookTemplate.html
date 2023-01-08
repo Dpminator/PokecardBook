@@ -1,6 +1,8 @@
 ﻿<html>
 <head>
     <title>Pokemon Cards Book</title>
+    <link rel="icon" type="image/png" href="https://pokemon-project.com/pokedex/img/sprite/EscarlataPurpura/2/1010.png">
+    <link rel="shortcut icon" type="image/png" href="https://pokemon-project.com/pokedex/img/sprite/EscarlataPurpura/2/1010.png">
     <style>
         @import url('https://rsms.me/inter/inter.css');
 
@@ -54,7 +56,7 @@
             height: 250px;
             visibility: hidden;
             border: 0.3px solid;
-            border-radius:7px;
+            border-radius: 7px;
             box-shadow: -0.5px -0.5px 4px 3px forestgreen, 0.5px 0.5px 4px 3px forestgreen;
             border-color: forestgreen;
         }
@@ -98,7 +100,6 @@
             box-shadow: 0 .2rem 0 rgb(230 230 230);
             font-family: "Inter";
         }
-
     </style>
     <script type="text/javascript" language="javascript">
         var pageSection = 0
@@ -117,7 +118,7 @@
             var newPageCount = parseInt(document.getElementById("PageCountInput").value)
             if (newPageCount % 2 == 1) newPageCount += 1
             var pageCountChange = newPageCount != pageCount || newBook ? ("&pages=" + newPageCount) : ""
-            var timeJson = await(await fetch("https://worldtimeapi.org/api/timezone/Etc/UTC", { method: "GET" })).json()
+            var timeJson = await (await fetch("https://worldtimeapi.org/api/timezone/Etc/UTC", { method: "GET" })).json()
             var nonceNumber = (new Date(timeJson.datetime)).getTime() * 10000
             var nonce = '&nonce=' + nonceNumber
             var url = '/api/update-book?updates=' + listOfChanges + '&book=' + bookName + pageCountChange + nonce
@@ -193,8 +194,7 @@
             document.getElementById("SelectedCard").style.boxShadow = "-0.5px -0.5px 4px 3px " + borderColour + ", 0.5px 0.5px 4px 3px " + borderColour
 
             document.getElementById("SwapCard").disabled = !(document.getElementById("UpdateCard").disabled)
-            if (swapCardMode && document.getElementById("SwapCard").disabled)
-            {
+            if (swapCardMode && document.getElementById("SwapCard").disabled) {
                 document.getElementById("SwapCard").innerHTML = "Swap Card"
                 swapCardMode = false
             }
@@ -288,8 +288,7 @@
         }
 
         function SetSelectedCardPosition(scroll = false) {
-            if (selectedSlot != "0")
-            {
+            if (selectedSlot != "0") {
                 document.getElementById("SelectedCard").style.left = document.getElementById("Cell_" + selectedPage + "_" + selectedSlot).getBoundingClientRect().left - 7
                 document.getElementById("SelectedCard").style.top = document.getElementById("Cell_" + selectedPage + "_" + selectedSlot).getBoundingClientRect().top - (scroll ? 14 : 7)
             }
@@ -371,8 +370,7 @@
             document.getElementById("SelectedCard").style.visibility =
                 ((selectedPage == leftPage || selectedPage == rightPage) && selectedPage != 0 && selectedPage != pageCount + 1 ? "visible" : "hidden")
 
-            for (var i = 1; i < 10; i++)
-            {
+            for (var i = 1; i < 10; i++) {
                 document.getElementById("Cell_" + leftPage + "_" + i).src = document.getElementById("Cell_" + leftPage + "_" + i).dataset.src
                 document.getElementById("Cell_" + rightPage + "_" + i).src = document.getElementById("Cell_" + rightPage + "_" + i).dataset.src
             }
