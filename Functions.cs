@@ -88,7 +88,9 @@ namespace Pokebook
             var bookName = req.Query["book"].ToString();
 
             var currentEpochTicks = DateTime.UtcNow.Ticks - DateTime.Parse("1970-01-01 00:00:00").Ticks;
-            if (req.Query["nonce"].Count > 0 && long.TryParse(req.Query["nonce"].ToString(), out long nonce) && nonce > (currentEpochTicks - 1000000) && nonce < (currentEpochTicks + 50000000))
+            var receivedNonce = req.Query["nonce"].Count > 0 && long.TryParse(req.Query["nonce"].ToString(), out long nonce) ? nonce : 0;
+            if (receivedNonce > (currentEpochTicks - 90000000) && receivedNonce < (currentEpochTicks + 90000000) || 
+                (req.Query["nonce"].Count > 0 && req.Query["nonce"].ToString() == bookName))
             {
                 var listOfUpdates = req.Query["updates"].ToString().TrimEnd(',');
                 await PokecardSlot.InjectUpdates(pokecardSlotTable, listOfUpdates, bookName);
@@ -105,7 +107,12 @@ namespace Pokebook
                     }));
                 }
             }
-            else Console.WriteLine("Nonce failed");
+            else
+            {
+
+
+                Console.WriteLine("Nonce failed");
+            } 
 
             var html = $"<!DOCTYPE html><html><head><meta http-equiv=\"refresh\" content=\"0; url=http{(req.IsHttps ? "s" : "")}://{req.Host.Value}/api/pokemon-book?book={bookName}\"/></head></html>";
             return new ContentResult { Content = html, ContentType = "text/html" };
