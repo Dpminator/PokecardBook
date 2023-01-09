@@ -364,14 +364,17 @@
 
         async function OpenCardEbayPrices() {
             if (document.getElementById("EbayPricesDiv").innerHTML == "") {
-                var ebayRestApiUrl = "/api/ebay-prices/" + document.getElementById("CardDetailSetName").value + "/" + document.getElementById("CardDetailCardNumber").value
+                document.getElementById("OpenCardEbayPrices").innerHTML = "Loading Card's Ebay Prices..."
+                document.getElementById("OpenCardEbayPrices").disabled = true
 
+                var ebayRestApiUrl = "/api/ebay-prices/" + document.getElementById("CardDetailSetName").value + "/" + document.getElementById("CardDetailCardNumber").value
                 var response = await fetch(ebayRestApiUrl + "?resultsCount=2", { method: "GET" });
                 var ebayPricesHtml = await response.text();
                 ebayPricesHtml += "<p><a href='" + ebayRestApiUrl + "' target='_blank'>More Results</a> (<a href='" + ebayRestApiUrl + "?json' target='_blank'>Json</a>)</p>"
 
                 document.getElementById("EbayPricesDiv").innerHTML = ebayPricesHtml
                 document.getElementById("OpenCardEbayPrices").innerHTML = "Hide Card's Ebay Prices"
+                document.getElementById("OpenCardEbayPrices").disabled = false
             } else
             {
                 document.getElementById("EbayPricesDiv").innerHTML = ""
