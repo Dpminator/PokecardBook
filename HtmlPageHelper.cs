@@ -434,7 +434,7 @@ namespace Pokebook
 
             foreach (var unlistedProperty in sqlProperties)
             {
-                QuerySql($"insert into StatusHistory values ('Inactive', {unlistedProperty.PropertyId})");
+                QuerySql($"insert into StatusHistory values ('Inactive', {unlistedProperty.PropertyId}, current_timestamp)");
                 changedSqlProperties.Add((false, 0, 0, 0, 0, unlistedProperty.Status, "Inactive", unlistedProperty));
             }
 
