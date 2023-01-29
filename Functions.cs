@@ -18,22 +18,22 @@ namespace Pokebook
             [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "card-image/{set}/{number}")] HttpRequest req, ExecutionContext exeCon,
             string set, string number)
         {
-            var urls = new List<string>()
-            {
-                PokecardSlot.GetPokecardImageUrl(set, number),
-                PokecardSlot.GetPokecardImageUrl2(set, number),
-                PokecardSlot.GetPokecardImageUrlZenith(set, number),
-                "https://www.mypokecard.com/en/Gallery/my/galery/5c4Z3OUCKurc.jpg"
-            };
-
-            foreach (var url in urls)
-            {
+            var urlNumber = 0;
+            while (urlNumber <= 3)
+            { 
+                urlNumber++;
+                var url = urlNumber switch
+                {
+                    1 => PokecardSlot.GetPokecardImageUrl(set, number),
+                    2 => PokecardSlot.GetPokecardImageUrl2(set, number),
+                    3 => "https://www.mypokecard.com/en/Gallery/my/galery/5c4Z3OUCKurc.jpg",
+                    _ => ""
+                };
                 if (url == "") continue;
                 var imageResponse = await new HttpClient().GetAsync(url);
-                if (imageResponse.IsSuccessStatusCode) 
+                if (imageResponse.IsSuccessStatusCode)
                     return new FileContentResult(await (imageResponse).Content.ReadAsByteArrayAsync(), "image/jpeg");
             }
-
             return new FileContentResult(Array.Empty<byte>(), "image/jpeg"); 
         }
 

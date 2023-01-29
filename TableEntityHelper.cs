@@ -121,6 +121,11 @@ namespace Pokebook
                 setId += "sv";
                 cardNumber = "SV" + cardNumber.Substring(cardNumber.StartsWith("SV") ? 2 : 0).PadLeft(3, '0');
             }
+            if (cardNumber.StartsWith("GG"))
+            {
+                setId += "gg";
+                cardNumber = "GG" + cardNumber.Substring(cardNumber.StartsWith("GG") ? 2 : 0).PadLeft(3, '0');
+            }
 
             var cardNumberSplit = cardNumber.Split('/');
             cardNumber = cardNumberSplit[0];
@@ -180,60 +185,13 @@ namespace Pokebook
                 _ => throw new Exception($"'{cardSet}' is not a valid set!")
             };
 
-            if (cardNumber.StartsWith("TG") || cardNumber.StartsWith("SV") || setId == "celebrationsclassic")
+            if (cardNumber.StartsWith("TG") || cardNumber.StartsWith("SV") || cardNumber.StartsWith("GG") || setId == "celebrationsclassic")
             {
                 if (setId == "celebrationsclassic") setId = "celebrations";
                 cardNumber = "h" + cardNumber.Substring(setId == "celebrations" ? 0 : 2).TrimStart('0');
             }
 
             return $"https://www.serebii.net/card/{setId}/{cardNumber}.jpg";
-        }
-
-        public static string GetPokecardImageUrlZenith(string cardSet, string cardNumber)
-        {
-            if (cardSet == "Promo" && (cardNumber.Contains("282") || cardNumber.Contains("283") || cardNumber.Contains("284")))
-            {
-                cardNumber = cardNumber.ToLower();
-                if (cardNumber.StartsWith("swsh")) cardNumber = cardNumber.Split("swsh")[1];
-                if (!int.TryParse(cardNumber, out int cn)) return "";
-                return cn switch
-                {
-                    282 => "https://images.squarespace-cdn.com/content/v1/5cf4cfa4382ac0000123aa1b/1667538693127-3437AP6P3L1IDBLRPS9D/IMG_2953.png",
-                    283 => "https://images.squarespace-cdn.com/content/v1/5cf4cfa4382ac0000123aa1b/1667538677264-L5TUK3EFQ6CK1U6KOODJ/IMG_2952.png",
-                    284 => "https://images.squarespace-cdn.com/content/v1/5cf4cfa4382ac0000123aa1b/1667538683191-FKALAQS7LI9FFLGASSFN/IMG_2954.png",
-                    _ => "",
-                };
-            }
-
-            if (cardSet != "Crown Zenith") return "";
-
-            if (cardNumber.ToLower().StartsWith("gg"))
-            {
-                if (!int.TryParse(cardNumber.ToLower().Split("gg")[1], out int cn)) return "";
-
-                var httpClient = new HttpClient();
-                httpClient.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("Mozilla", "5.0"));
-                httpClient.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("(Windows NT 10.0; Win64; x64)"));
-
-                var html = httpClient.GetAsync("https://www.justinbasil.com/visual/ss125").GetAwaiter().GetResult()
-                    .Content
-                    .ReadAsStringAsync().GetAwaiter().GetResult();
-
-                return html.Split("<div class=\"sqs-gallery\">")[13].Split("<noscript><img src=\"")[cn].Split("\"")[0];
-            }
-            else
-            {
-                if (!int.TryParse(cardNumber, out int cn)) return "";
-                return cn switch
-                {
-                    147 => "https://images.squarespace-cdn.com/content/v1/5cf4cfa4382ac0000123aa1b/1672783150367-351N529R8A01THQPG816/IMG_3432.jpeg",
-                    148 => "https://images.squarespace-cdn.com/content/v1/5cf4cfa4382ac0000123aa1b/1669912687661-01M1CHWY45VR286DDNMC/249.jpg",
-                    149 => "https://images.squarespace-cdn.com/content/v1/5cf4cfa4382ac0000123aa1b/1669912686925-W8EMP0V2SFUBSV8OQPPG/247.jpg",
-                    150 => "https://images.squarespace-cdn.com/content/v1/5cf4cfa4382ac0000123aa1b/1669912687247-MC3RAHDZRJMJK06AFTOZ/248-1.jpg",
-                    151 => "https://images.squarespace-cdn.com/content/v1/5cf4cfa4382ac0000123aa1b/1669912686230-YUVGTL0QAGGGTAAOKPR7/245.jpg",
-                    _ => "",
-                };
-            }
         }
     }
 
