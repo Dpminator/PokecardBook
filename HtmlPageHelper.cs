@@ -335,18 +335,19 @@ namespace Pokebook
                     if (!listedItem.Contains("class=\"listing\"")) continue;
 
                     var lines = listedItem.Split("\n");
+                    var lineOffset = lines[3].Contains("badge") ? 1 : 0;
 
                     var link = "https://www.lucasre.com.au" + lines[0].Split("\"")[0];
-                    var address = lines[6];
-                    var suburb = lines[9];
+                    var address = lines[6 + lineOffset];
+                    var suburb = lines[9 + lineOffset];
                     var sqlProperty = sqlProperties.SingleOrDefault(x => x.Address == address && x.Suburb == suburb, null);
                     var newProperty = (sqlProperty == null);
                     if (!newProperty) sqlProperties.Remove(sqlProperty);
                     var propertyId = newProperty ? 0 : sqlProperty.PropertyId;
                     var oldMinPrice = 0;
                     var oldMaxPrice = 0;
-                    var minPrice = int.Parse(lines[12].Split("-")[0].Trim().TrimStart('$').Replace(",", ""));
-                    var maxPrice = int.Parse(lines[12].Split("-")[1].Trim().TrimStart('$').Replace(",", ""));
+                    var minPrice = int.Parse(lines[12+ lineOffset].Split("-")[0].Trim().TrimStart('$').Replace(",", ""));
+                    var maxPrice = int.Parse(lines[12+ lineOffset].Split("-")[1].Trim().TrimStart('$').Replace(",", ""));
                     var priceChange = (!newProperty && (sqlProperty.MinimumPrice != minPrice || sqlProperty.MaximumPrice != maxPrice));
                     if (priceChange)
                     {
@@ -355,11 +356,11 @@ namespace Pokebook
                         sqlProperty.MinimumPrice = minPrice;
                         sqlProperty.MaximumPrice = maxPrice;
                     }
-                    var bedroomCount = int.Parse(lines[17].Split("</span>")[1]);
-                    var bathroomCount = int.Parse(lines[20].Split("</span>")[1]);
+                    var bedroomCount = int.Parse(lines[17+ lineOffset].Split("</span>")[1]);
+                    var bathroomCount = int.Parse(lines[20+ lineOffset].Split("</span>")[1]);
                     var carCount = 0;
                     if (listedItem.Contains("<span class=\"icon-car\"></span>"))
-                        carCount = int.Parse(lines[23].Split("</span>")[1]);
+                        carCount = int.Parse(lines[23+ lineOffset].Split("</span>")[1]);
 
                     var lucasResponse2 = await httpClient.GetAsync(link);
                     var lucasHtml2 = lucasResponse2.Content.ReadAsStringAsync().GetAwaiter().GetResult();
