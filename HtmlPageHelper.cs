@@ -374,7 +374,10 @@ namespace Pokebook
 
                     var oldStatus = "";
                     var status = "Active";
-                    if (sizeMetresSquared == 0 || councilRates == 0 || waterRates == 0 || strataFees == 0)
+                    if (lucasHtml2.Contains("<div class='main-badge large'>"))
+                    {
+                        status = $"Badge:{lucasHtml2.Split("<div class='main-badge large'>")[1].Split("</div>")[0].Trim()}";
+                    }else if (sizeMetresSquared == 0 || councilRates == 0 || waterRates == 0 || strataFees == 0)
                     {
                         var missingInfoText = "";
                         if (sizeMetresSquared == 0) missingInfoText += "size,";
@@ -382,9 +385,6 @@ namespace Pokebook
                         if (waterRates == 0) missingInfoText += "water,";
                         if (strataFees == 0) missingInfoText += "strata";
                         status = $"MissingInfo:{missingInfoText.TrimEnd(',')}";
-                    } else if (lucasHtml2.Contains("<div class='main-badge large'>"))
-                    {
-                        status = $"Badge:{lucasHtml2.Split("<div class='main-badge large'>")[1].Split("</div>")[0].Trim()}";
                     }
 
                     var statusUpdate = (!newProperty && status != sqlProperty.Status);
