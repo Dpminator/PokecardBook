@@ -365,12 +365,24 @@ namespace Pokebook
                     var lucasResponse2 = await httpClient.GetAsync(link);
                     var lucasHtml2 = lucasResponse2.Content.ReadAsStringAsync().GetAwaiter().GetResult();
 
+                    var oldSize = 0;
+                    var oldCouncilRates = 0;
+                    var oldWaterRates = 0;
+                    var OldStrata = 0;
                     var sizeMetresSquared = 0;
                     if (lucasHtml2.Contains("<span class=\"detail-title\">Total Size</span>"))
                         sizeMetresSquared = int.Parse(lucasHtml2.Split("Total Size</span>\n<span class=\"detail-text\">")[1].Split("m<sup>")[0].Replace(",", ""));
                     var councilRates = GetFeesPerAnnum(lucasHtml2, "Council Rates");
                     var waterRates = GetFeesPerAnnum(lucasHtml2, "Water Rates"); 
                     var strataFees = GetFeesPerAnnum(lucasHtml2, "Strata Fees");
+                    if (!newProperty)
+                    {
+                        oldSize = sqlProperty.AreaSquareMeters;
+                        oldCouncilRates = sqlProperty.CouncilRates;
+                        oldWaterRates = sqlProperty.WaterRates;
+                        OldStrata = sqlProperty.StrataFess;
+                    }
+                    var feesUpdate = !newProperty && (oldSize != sizeMetresSquared || oldCouncilRates != councilRates || oldWaterRates != waterRates || OldStrata != strataFees);
 
                     var oldStatus = "";
                     var status = "Active";
@@ -429,6 +441,11 @@ namespace Pokebook
                         if (priceChange) QuerySql($"insert into PriceHistory values ({minPrice}, {maxPrice}, {propertyId}, current_timestamp)");
                         if (statusUpdate) QuerySql($"insert into StatusHistory values ('{status}', {propertyId}, current_timestamp)");
                         changedSqlProperties.Add((newProperty, oldMinPrice, minPrice, oldMaxPrice, maxPrice, oldStatus, status, sqlProperty));
+                    }
+
+                    if (feesUpdate)
+                    {
+                        QuerySql($"update Property set AreaSquareMeters = {sizeMetresSquared}, CouncilRates = {councilRates}, WaterRates = {waterRates}, StrataFees = {strataFees} where propertyId = {sqlProperty.PropertyId}");
                     }
                 }
             }
