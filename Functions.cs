@@ -70,6 +70,93 @@ namespace Pokebook
             return new OkObjectResult(results == "" ? "No changes" : results);
         }
 
+        [FunctionName("MortgageCalculator")]
+        public static async Task<ContentResult> MortgageCalculator([HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "mortgage")] HttpRequest req, ExecutionContext exeCon)
+        {
+            var propertyPrice = req.Query["propertyprice"].Count > 0 ? int.Parse(req.Query["propertyprice"].ToString()) : 630000;
+            var savings = req.Query["savings"].Count > 0 ? int.Parse(req.Query["savings"].ToString()) : 70000;
+            var interestRatePercent = req.Query["interestrate"].Count > 0 ? double.Parse(req.Query["interestrate"].ToString()) : 5.2;
+            var loanInYears = req.Query["loanlength"].Count > 0 ? int.Parse(req.Query["loanlength"].ToString()) : 30;
+
+            var output = $"Property Price: ${propertyPrice}<br>";
+            output += $"Current Savings: ${savings}<br>";
+            output += $"Interest Rate: {interestRatePercent}%<br>";
+            output += $"Loan Length: {loanInYears} Years<br><br><br>";
+
+            double calculateStampDuty()
+            {
+                if (propertyPrice < 600000) return 0;
+                var a = 0.0000004;
+                var b = 0.6214/3;
+                var x = propertyPrice - 600000;
+                return a*(x*x) + (b*x);
+            }
+            var stampDuty = calculateStampDuty();
+            output += $"Stamp Duty: ${Math.Round(stampDuty, 2)}<br>";
+
+            double calculateTransferFee()
+            {
+                var paperLodgementFee = 101.7;
+                var considerationFactor = 2.34;
+                var maxPaper = 3612d;
+
+                return Math.Min((Math.Floor(propertyPrice / 1000d) * considerationFactor) + paperLodgementFee, Math.Round(maxPaper));
+            }
+            var transferFee = calculateTransferFee();
+            output += $"Transfer Fee: ${Math.Ceiling(transferFee)}<br>";
+
+            var governmentFees = 124.00;
+            output += $"Government Fees: ${governmentFees}<br><br>";
+
+            var availableDeposit = savings - stampDuty - transferFee - governmentFees;
+            output += $"Available Deposit: ${Math.Ceiling(availableDeposit)}<br>";
+
+            var depositPercent = Math.Round((availableDeposit / propertyPrice) * 100, 2);
+            output += $"Deposit percentage: {depositPercent}%<br>";
+
+            double calculateLmi()
+            {
+                var loanAmount = propertyPrice - availableDeposit;
+
+                var lvr = Math.Floor(100 * loanAmount / propertyPrice);
+                if (lvr < 80) return 0;
+                if (lvr > 95) return 100000;
+
+                var variableScale = (lvr-80)/15;
+                var a = variableScale * 3.343881;
+                var b = 1200 * -0.0000000001630831 / variableScale;
+                var c = -0.00001561 * variableScale /20;
+                var d = 0.000015601 * variableScale /23;
+
+                var multiplier =  (a - (b / c) * (1 - Math.Exp(d * loanAmount)));
+
+                return multiplier / 100 * loanAmount * 0.978;
+            }
+            var lmiEstimate = calculateLmi();
+            output += $"LMI: ${Math.Round(lmiEstimate, 2)}<br><br>";
+
+
+            var loanAmount = propertyPrice - availableDeposit + lmiEstimate;
+            output += $"Loan Amount: ${Math.Ceiling(loanAmount)}<br><br>";
+
+            double calculateMonthlyMortgage()
+            {
+                var monthlyInterest = (interestRatePercent / 100) / 12;
+                var NumberOfPayments = loanInYears*12;
+                return loanAmount * (monthlyInterest * Math.Pow(1 + monthlyInterest, NumberOfPayments)) / (Math.Pow(1 + monthlyInterest, NumberOfPayments) - 1);
+            }
+            var MonthlyMortgage = Math.Round(calculateMonthlyMortgage(),2);
+            output += $"Monthly Mortgage: ${MonthlyMortgage}<br>";
+
+            var MonthlyMortgagePrincipal = loanAmount/(loanInYears*12);
+            output += $"Monthly Mortgage Principal: ${Math.Round(MonthlyMortgagePrincipal, 2)}<br>";
+
+            var MonthlyMortgageInterest = MonthlyMortgage - MonthlyMortgagePrincipal;
+            output += $"Monthly Mortgage Interest: ${Math.Round(MonthlyMortgageInterest, 2)}<br>";
+
+            return new ContentResult { Content = output, ContentType = "text/html" };
+        }
+
         [FunctionName("PokemonBook")]
         public static async Task<ContentResult> ProducePokemonBookHtmlPage(
             [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "pokemon-book")] HttpRequest req,
