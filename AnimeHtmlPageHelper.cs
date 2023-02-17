@@ -65,7 +65,7 @@ namespace Pokebook
 
         private static DataTable QuerySql(string query)
         {
-            Console.WriteLine(query);
+            //Console.WriteLine(query);
             DataTable dataTable = new();
             using SqlConnection sqlConnection = new(sqlConnString);
             using SqlCommand sqlCommand = sqlConnection.CreateCommand();

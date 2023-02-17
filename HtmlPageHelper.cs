@@ -347,7 +347,7 @@ namespace Pokebook
                     var oldMinPrice = 0;
                     var oldMaxPrice = 0;
                     var minPrice = int.Parse(lines[12+ lineOffset].Split("-")[0].Trim().TrimStart('$').Replace(",", ""));
-                    var maxPrice = int.Parse(lines[12+ lineOffset].Split("-")[1].Trim().TrimStart('$').Replace(",", ""));
+                    var maxPrice = lines[12 + lineOffset].Contains("-") ? int.Parse(lines[12+ lineOffset].Split("-")[1].Trim().TrimStart('$').Replace(",", "")) : minPrice;
                     var priceChange = (!newProperty && (sqlProperty.MinimumPrice != minPrice || sqlProperty.MaximumPrice != maxPrice));
                     if (priceChange)
                     {
