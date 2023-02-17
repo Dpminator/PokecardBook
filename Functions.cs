@@ -8,6 +8,8 @@ using Microsoft.Azure.Cosmos.Table;
 using System.Collections.Generic;
 using System.Linq;
 using System;
+using System.Net.Http.Headers;
+using System.Text.Json;
 
 namespace Pokebook
 {
@@ -61,6 +63,20 @@ namespace Pokebook
             {
                 await LucasHelper.PingDiscord($"An Error has occured:\\n{e}");
             }
+        }
+
+        [FunctionName("UpdateAnimeListsWeekly")]
+        public static async Task CheckForLeftoverAnimeUpdates([TimerTrigger("0 0 0 * * 0")] TimerInfo myTimer)
+        {
+            await AnimeHelper.SetUpDatabaseTables();
+            await AnimeHelper.UpdateAnimeList(false);
+        }
+
+        [FunctionName("UpdateAnimeListsHourly")]
+        public static async Task CheckAnimeUpdates([TimerTrigger("0 0 * * * *")] TimerInfo myTimer)
+        {
+            await AnimeHelper.SetUpDatabaseTables();
+            await AnimeHelper.UpdateAnimeList(true);
         }
 
         [FunctionName("DomTest")]
@@ -156,6 +172,21 @@ namespace Pokebook
 
             return new ContentResult { Content = output, ContentType = "text/html" };
         }
+
+
+        [FunctionName("Anime")]
+        public static async Task<ContentResult> Anime([HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "anime")] HttpRequest req, ExecutionContext exeCon)
+        {
+            await AnimeHelper.SetUpDatabaseTables();
+            await AnimeHelper.UpdateAnimeList(false);
+
+
+            var output = "Done";
+
+            return new ContentResult { Content = output, ContentType = "text/html" };
+        }
+
+           
 
         [FunctionName("PokemonBook")]
         public static async Task<ContentResult> ProducePokemonBookHtmlPage(
