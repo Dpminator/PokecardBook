@@ -5,11 +5,8 @@ using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.AspNetCore.Http;
 using System.Net.Http;
 using Microsoft.Azure.Cosmos.Table;
-using System.Collections.Generic;
 using System.Linq;
 using System;
-using System.Net.Http.Headers;
-using System.Text.Json;
 
 namespace Pokebook
 {
@@ -63,20 +60,6 @@ namespace Pokebook
             {
                 await LucasHelper.PingDiscord($"An Error has occured:\\n{e}");
             }
-        }
-
-        [FunctionName("UpdateAnimeListsWeekly")]
-        public static async Task CheckForLeftoverAnimeUpdates([TimerTrigger("0 0 0 * * 0")] TimerInfo myTimer)
-        {
-            await AnimeHelper.SetUpDatabaseTables();
-            await AnimeHelper.UpdateAnimeList(false);
-        }
-
-        [FunctionName("UpdateAnimeListsHourly")]
-        public static async Task CheckAnimeUpdates([TimerTrigger("0 0 * * * *")] TimerInfo myTimer)
-        {
-            await AnimeHelper.SetUpDatabaseTables();
-            await AnimeHelper.UpdateAnimeList(true);
         }
 
         [FunctionName("DomTest")]
@@ -175,15 +158,12 @@ namespace Pokebook
 
 
         [FunctionName("Anime")]
-        public static async Task<ContentResult> Anime([HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "anime")] HttpRequest req, ExecutionContext exeCon)
+        public static async Task<ContentResult> Anime([HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "anime/{titleCode}")] HttpRequest req, ExecutionContext exeCon, string titleCode)
         {
             await AnimeHelper.SetUpDatabaseTables();
-            await AnimeHelper.UpdateAnimeList(false);
+            var html = await AnimeHelper.GetLandingPageHtml(titleCode);
 
-
-            var output = "Done";
-
-            return new ContentResult { Content = output, ContentType = "text/html" };
+            return new ContentResult { Content = html, ContentType = "text/html" };
         }
 
            
