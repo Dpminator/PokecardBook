@@ -153,7 +153,7 @@ namespace Pokebook
 
             var htmlFile = "animeLandingPageTemplate.html";
             var htmlTemplate = File.ReadAllText(File.Exists(htmlFile) ? htmlFile : $"C:/home/site/wwwroot/{htmlFile}");
-            var finalHtml = htmlTemplate.Replace("{{CONTENT GOES HERE}}", htmlInnerContent).Replace("{{SCRIPTS GO HERE}}", $"document.title = '{animeTitle}'");
+            var finalHtml = htmlTemplate.Replace("{{CONTENT GOES HERE}}", htmlInnerContent).Replace("{{SCRIPTS GO HERE}}", $"document.title = '{animeTitle.Replace("'", "\\'")}'");
 
             return finalHtml;
         }
