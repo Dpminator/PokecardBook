@@ -156,7 +156,6 @@ namespace Pokebook
             return new ContentResult { Content = output, ContentType = "text/html" };
         }
 
-
         [FunctionName("Anime")]
         public static async Task<ContentResult> Anime([HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "anime/{titleCode}")] HttpRequest req, ExecutionContext exeCon, string titleCode)
         {
@@ -166,7 +165,13 @@ namespace Pokebook
             return new ContentResult { Content = html, ContentType = "text/html" };
         }
 
-           
+        [FunctionName("AnimeUpdate")]
+        public static async Task<ContentResult> AnimeUpdate([HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "anime/update")] HttpRequest req, ExecutionContext exeCon)
+        {
+            await AnimeHelper.UpdateAnimeList(true);
+
+            return new ContentResult { Content = "Done", ContentType = "text/html" };
+        }
 
         [FunctionName("PokemonBook")]
         public static async Task<ContentResult> ProducePokemonBookHtmlPage(

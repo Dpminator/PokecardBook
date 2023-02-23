@@ -118,7 +118,7 @@ namespace Pokebook
 
         public static async Task<string> GetLandingPageHtml(string titleCode)
         {
-            await UpdateAnimeList();
+            await UpdateAnimeList(false);
 
             var animeTitle = QuerySql($"select Title from Anime where TitleCode = '{titleCode}'").Rows[0].ItemArray[0].ToString();
 
@@ -158,10 +158,10 @@ namespace Pokebook
             return finalHtml;
         }
 
-        public static async Task UpdateAnimeList()
+        public static async Task UpdateAnimeList(bool fullUpdate = false)
         {
             var currentUtcTime = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss.FFF");
-            var lastUpdateUtcTime = DateTime.Parse(QuerySql("select top 1 DateTimeUpdated from UpdateHistory order by UpdateHistoryId desc").Rows[0].ItemArray[0].ToString());
+            var lastUpdateUtcTime = fullUpdate ? new() : DateTime.Parse(QuerySql("select top 1 DateTimeUpdated from UpdateHistory order by UpdateHistoryId desc").Rows[0].ItemArray[0].ToString());
 
             var httpClient = new HttpClient();
             httpClient.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("Mozilla", "5.0"));
@@ -182,10 +182,10 @@ namespace Pokebook
                 var kaaJsonRoot = JsonDocument.Parse(content).RootElement;
                 var kaaJsonList = kaaJsonRoot.EnumerateArray().ToList();
                 animeList.AddRange(kaaJsonList.DistinctBy(x => x.GetProperty("title").GetString()).ToList());
-                if (DateTime.Parse(kaaJsonList.Last().GetProperty("lastUpdate").ToString().TrimEnd('Z')) < lastUpdateUtcTime) break;
+                if (!fullUpdate && DateTime.Parse(kaaJsonList.Last().GetProperty("lastUpdate").ToString().TrimEnd('Z')) < lastUpdateUtcTime) break;
             }
 
-            animeList = animeList.Where(x => DateTime.Parse(x.GetProperty("lastUpdate").ToString().TrimEnd('Z')) > lastUpdateUtcTime).ToList();
+            if (!fullUpdate) animeList = animeList.Where(x => DateTime.Parse(x.GetProperty("lastUpdate").ToString().TrimEnd('Z')) > lastUpdateUtcTime).ToList();
             foreach (var anime in animeList)
             {
                 var title = anime.GetProperty("title").GetString();
@@ -228,25 +228,20 @@ namespace Pokebook
                     var kaaResponse3 = await httpClient.GetAsync($"{kickassAnimeBaseUrl.TrimEnd('/')}/api/episodes/{kaaSeasonId}?lh={language}");
                     var kaaAnimeEpisodes = JsonDocument.Parse(kaaResponse3.Content.ReadAsStringAsync().GetAwaiter().GetResult()).RootElement.GetProperty("result").EnumerateArray().ToList();
 
-                    bool breakLoop = false;
                     foreach (var episode in kaaAnimeEpisodes)
                     {
-                        var episodeNumber = int.TryParse(episode.GetProperty("episodeNumber").ToString(), out var epNum) ? $"{epNum}" : "NULL";
                         var urlSlug = episode.GetProperty("slug").ToString();
-                        var datetime = (urlSlug == latestEpisodeSlug) ? $"'{latestEpisodeUpdateTime}'" : "NULL";
 
                         if (QuerySql($"select * from AnimeEpisode where UrlSlug = '{urlSlug}'").Rows.Count == 0)
                         {
+                            var episodeNumber = int.TryParse(episode.GetProperty("episodeNumber").ToString(), out var epNum) ? $"{epNum}" : "NULL";
+                            var datetime = (urlSlug == latestEpisodeSlug) ? $"'{latestEpisodeUpdateTime}'" : "NULL";
+
                             var query = $"insert into AnimeEpisode (AnimeId, KaaSeasonId, EpisodeNumber, SeasonNumber, DateTimeUploaded, UrlSlug) values ('{dbAnimeId}', '{kaaSeasonId}', {episodeNumber}, {kaaSeasonNumber}, {datetime}, '{urlSlug}')";
                             QuerySql(query);
                         }
-                        else
-                        {
-                            breakLoop = true;
-                            break;
-                        } 
+                        else break;
                     }
-                    if (breakLoop) break;
                 }
             }
 
