@@ -29,6 +29,7 @@ namespace Pokebook
             public int? EpisodeNumber { get; set; }
             public string KaaSeasonId { get; set; }
             public string UrlSlug { get; set; }
+            public string ThumbnailSlug { get; set; }
             public DateTime? DateTimeUploaded { get; set; }
         }
 
@@ -116,6 +117,25 @@ namespace Pokebook
             }
         }
 
+        public static async Task<string> GetNuxtContent(string fileName)
+        {
+            var client = GetHttpClient();
+            var nuxtResponse = await client.GetAsync($"{kickassAnimeBaseUrl.TrimEnd('/')}/_nuxt/{fileName}");
+            var content =  nuxtResponse.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+
+            var fileType = fileName.Split("?")[0].Split(".").Last();
+            if (fileType == "css" && content.Contains(".v-layout--full-height"))
+                content = content.Replace("{--v-scrollbar-offset:inherit;height:100%}", "{--v-scrollbar-offset:inherit}");
+
+            return content;
+        }
+
+        public static async Task<HttpResponseMessage> GetNuxtFontResponse(string fileName)
+        {
+            var client = GetHttpClient();
+            return await client.GetAsync($"{kickassAnimeBaseUrl.TrimEnd('/')}/_nuxt/{fileName}");
+        }
+
         public static async Task<string> GetLandingPageHtml(string titleCode)
         {
             await UpdateAnimeList(false);
@@ -135,34 +155,46 @@ namespace Pokebook
                     EpisodeNumber = int.TryParse(queryDataRows[i].ItemArray[3].ToString(), out var ep) ? ep : null,
                     KaaSeasonId = queryDataRows[i].ItemArray[4].ToString(),
                     UrlSlug = queryDataRows[i].ItemArray[5].ToString(),
-                    DateTimeUploaded = DateTime.TryParse(queryDataRows[i].ItemArray[6].ToString().TrimEnd('Z'), out var dt) ? dt : null,
+                    ThumbnailSlug = queryDataRows[i].ItemArray[6].ToString(),
+                    DateTimeUploaded = DateTime.TryParse(queryDataRows[i].ItemArray[7].ToString().TrimEnd('Z'), out var dt) ? dt : null,
                 });
 
-            
-            var htmlInnerContent = $"<h1>{animeTitle}</h1>";
+            var htmlInnerContent = $"<div class='v-container px-5'><div class='section-header'><div class='text-h3'>{animeTitle}</div></div></div>";
             foreach (var seasonNumber in animeEpisodes.Select(x => x.SeasonNumber).Distinct())
             {
-                htmlInnerContent += $"<h2>Season {seasonNumber}</h2>";
+                htmlInnerContent += $"<div class='v-container px-5'><div class='section-header'><div class='text-h5'>Season {seasonNumber}</div></div>";
+                htmlInnerContent += "<div class='v-row'>";
                 foreach (var episode in animeEpisodes.Where(x => x.SeasonNumber == seasonNumber))
                 {
-                    htmlInnerContent += $"<a href=\"{kickassAnimeBaseUrl}/watch/{episode.UrlSlug}\">Episode {episode.EpisodeNumber}</a>";
-                    htmlInnerContent += "<br>";
+                    var episodeUrl = $"{kickassAnimeBaseUrl}/watch/{episode.UrlSlug}";
+                    var thumbnailUrl = $"{kickassAnimeBaseUrl}/images/thumbnail/{episode.ThumbnailSlug}.webp";
+
+                    htmlInnerContent += "<div class='v-col-sm-4 v-col-md-2 v-col-6'>";
+                    htmlInnerContent += $"<a class='v-card v-card--link v-theme--dark v-card--density-default rounded-lg v-card--variant-elevated' href='{episodeUrl}' disabledx='true'>";
+                    htmlInnerContent += "<div class='v-card__loader'>";
+                    htmlInnerContent += "<div class='v-progress-linear v-theme--dark' role='progressbar' aria-hidden='true' aria-valuemin='0' aria-valuemax='100' style='top:0px;height:0px;--v-progress-linear-height:2px;left:50%;transform:translateX(-50%);'>";
+                    htmlInnerContent += "<div class='v-progress-linear__background' style='width: 100%;'></div><div class='v-progress-linear__indeterminate'>";
+                    htmlInnerContent += "<div class='v-progress-linear__indeterminate long'></div><div class='v-progress-linear__indeterminate short'></div>";
+                    htmlInnerContent += "</div></div></div><div class='v-responsive v-img v-img--booting'>";
+                    htmlInnerContent += "<div class='v-responsive__sizer' style='padding-bottom:56.25%;'></div>";
+                    htmlInnerContent += $"<img class='v-img__img v-img__img--cover' src='{thumbnailUrl}' alt='' style=''>";
+                    htmlInnerContent += "<div class='v-responsive__content'>";
+                    htmlInnerContent += "<span class='v-chip v-theme--dark bg-primary v-chip--density-comfortable rounded-sm v-chip--size-x-small v-chip--variant-elevated font-medium' draggable='false'>";
+                    htmlInnerContent += $"<span class='v-chip__underlay'></span>EP {episode.EpisodeNumber}</span></div></div>";
+                    htmlInnerContent += "<span class='v-card__overlay'></span><span class='v-card__underlay'></span></a></div>";
                 }
-                htmlInnerContent += $"<br><br>";
+                htmlInnerContent += $"</div></div>";
             }
 
             var htmlFile = "animeLandingPageTemplate.html";
             var htmlTemplate = File.ReadAllText(File.Exists(htmlFile) ? htmlFile : $"C:/home/site/wwwroot/{htmlFile}");
-            var finalHtml = htmlTemplate.Replace("{{CONTENT GOES HERE}}", htmlInnerContent).Replace("{{SCRIPTS GO HERE}}", $"document.title = '{animeTitle.Replace("'", "\\'")}'");
+            var finalHtml = htmlTemplate.Replace("{{CONTENT GOES HERE}}", htmlInnerContent).Replace("{{SCRIPTS GO HERE}}", "").Replace("{{PAGE TITLE}}", animeTitle);
 
             return finalHtml;
         }
 
-        public static async Task UpdateAnimeList(bool fullUpdate = false)
+        private static HttpClient GetHttpClient()
         {
-            var currentUtcTime = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss.FFF");
-            var lastUpdateUtcTime = fullUpdate ? new() : DateTime.Parse(QuerySql("select top 1 DateTimeUpdated from UpdateHistory order by UpdateHistoryId desc").Rows[0].ItemArray[0].ToString());
-
             var httpClient = new HttpClient();
             httpClient.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("Mozilla", "5.0"));
             httpClient.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("(Windows NT 10.0; Win64; x64)"));
@@ -170,6 +202,16 @@ namespace Pokebook
             httpClient.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("(KHTML, like Gecko)"));
             httpClient.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("Chrome", "109.0.0.0"));
             httpClient.DefaultRequestHeaders.UserAgent.Add(new ProductInfoHeaderValue("Safari", "537.36"));
+
+            return httpClient;
+        }
+
+        public static async Task UpdateAnimeList(bool fullUpdate = false)
+        {
+            var currentUtcTime = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss.FFF");
+            var lastUpdateUtcTime = fullUpdate ? new() : DateTime.Parse(QuerySql("select top 1 DateTimeUpdated from UpdateHistory order by UpdateHistoryId desc").Rows[0].ItemArray[0].ToString());
+
+            var httpClient = GetHttpClient();
 
             List<JsonElement> animeList = new();
             for (var i = 0; i < 100; i++)
@@ -225,22 +267,37 @@ namespace Pokebook
                     var kaaSeasonId = season.GetProperty("id").ToString();
                     var kaaSeasonNumber = season.GetProperty("number").GetInt32();
 
-                    var kaaResponse3 = await httpClient.GetAsync($"{kickassAnimeBaseUrl.TrimEnd('/')}/api/episodes/{kaaSeasonId}?lh={language}");
-                    var kaaAnimeEpisodes = JsonDocument.Parse(kaaResponse3.Content.ReadAsStringAsync().GetAwaiter().GetResult()).RootElement.GetProperty("result").EnumerateArray().ToList();
-
-                    foreach (var episode in kaaAnimeEpisodes)
+                    var pageLimit = 100;
+                    var currentPage = 1;
+                    while (currentPage <= pageLimit)
                     {
-                        var urlSlug = episode.GetProperty("slug").ToString();
+                        var kaaResponse3 = await httpClient.GetAsync($"{kickassAnimeBaseUrl.TrimEnd('/')}/api/episodes/{kaaSeasonId}?lh={language}&page={currentPage}");
+                        var kaaResponse3Json = JsonDocument.Parse(kaaResponse3.Content.ReadAsStringAsync().GetAwaiter().GetResult()).RootElement;
+                        if (currentPage == 1) pageLimit = kaaResponse3Json.GetProperty("limit").GetInt32();
+                        var kaaAnimeEpisodes = kaaResponse3Json.GetProperty("result").EnumerateArray().ToList();
 
-                        if (QuerySql($"select * from AnimeEpisode where UrlSlug = '{urlSlug}'").Rows.Count == 0)
+                        var breakWhileLoop = false;
+                        foreach (var episode in kaaAnimeEpisodes)
                         {
-                            var episodeNumber = int.TryParse(episode.GetProperty("episodeNumber").ToString(), out var epNum) ? $"{epNum}" : "NULL";
-                            var datetime = (urlSlug == latestEpisodeSlug) ? $"'{latestEpisodeUpdateTime}'" : "NULL";
+                            var urlSlug = episode.GetProperty("slug").ToString();
 
-                            var query = $"insert into AnimeEpisode (AnimeId, KaaSeasonId, EpisodeNumber, SeasonNumber, DateTimeUploaded, UrlSlug) values ('{dbAnimeId}', '{kaaSeasonId}', {episodeNumber}, {kaaSeasonNumber}, {datetime}, '{urlSlug}')";
-                            QuerySql(query);
+                            if (QuerySql($"select * from AnimeEpisode where UrlSlug = '{urlSlug}'").Rows.Count == 0)
+                            {
+                                var thumbnailSlug = episode.GetProperty("thumbnail").GetProperty("sm").GetProperty("name").ToString();
+                                var episodeNumber = int.TryParse(episode.GetProperty("episodeNumber").ToString(), out var epNum) ? $"{epNum}" : "NULL";
+                                var datetime = (urlSlug == latestEpisodeSlug) ? $"'{latestEpisodeUpdateTime}'" : "NULL";
+
+                                var query = $"insert into AnimeEpisode (AnimeId, KaaSeasonId, EpisodeNumber, SeasonNumber, DateTimeUploaded, UrlSlug, ThumbnailSlug) values ('{dbAnimeId}', '{kaaSeasonId}', {episodeNumber}, {kaaSeasonNumber}, {datetime}, '{urlSlug}', '{thumbnailSlug}')";
+                                QuerySql(query);
+                            }
+                            else
+                            {
+                                breakWhileLoop = true;
+                                break;
+                            } 
                         }
-                        else break;
+                        if (breakWhileLoop) break;
+                        currentPage += 1;
                     }
                 }
             }

@@ -165,6 +165,33 @@ namespace Pokebook
             return new ContentResult { Content = html, ContentType = "text/html" };
         }
 
+        [FunctionName("AnimeNuxt")]
+        public static async Task<ActionResult> AnimeNuxt([HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "_nuxt/{fileName}")] HttpRequest req, ExecutionContext exeCon, string fileName)
+        {
+            var fileType = fileName.Split("?")[0].Split(".").Last();
+            var contentType = fileType switch
+            {
+                "js" => "application/javascript",
+                "css" => "text/css; charset=utf-8",
+                "woff" => "font/woff",
+                "woff2" => "font/woff2",
+                "ttf" => "font/ttf",
+                "eot" => "text/html;charset=utf-8",
+                _ => throw new NotImplementedException()
+            };
+
+            if (fileType.Contains("woff") || fileType == "ttf")
+            {
+                var fontResponse = await AnimeHelper.GetNuxtFontResponse(fileName);
+                return new FileContentResult(await (fontResponse).Content.ReadAsByteArrayAsync(), contentType);
+            }
+            else
+            {
+                var content = await AnimeHelper.GetNuxtContent(fileName);
+                return new ContentResult { Content = content, ContentType = contentType };
+            }  
+        }
+
         [FunctionName("AnimeUpdate")]
         public static async Task<ContentResult> AnimeUpdate([HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "anime/update")] HttpRequest req, ExecutionContext exeCon)
         {

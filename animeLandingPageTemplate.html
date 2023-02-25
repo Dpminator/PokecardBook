@@ -1,111 +1,530 @@
 ﻿<html>
 <head>
-    <title>Anime page</title>
+    <meta charset="utf-8">
+    <title>{{PAGE TITLE}}</title>
     <link rel="icon" type="image/png" href="https://b.thumbs.redditmedia.com/-KjPTWzzbWcj-lNo9uFShd7B-UJs6ptZ375LfHyKoPI.png">
     <link rel="shortcut icon" type="image/png" href="https://b.thumbs.redditmedia.com/-KjPTWzzbWcj-lNo9uFShd7B-UJs6ptZ375LfHyKoPI.png">
-    <style>
-        table, th, tr, td {
-            border: 1px solid black;
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Welcome to KickAssAnime, the worlds most active online anime community. Watch anime online for free in qualities from 240p to 1080p HD Videos.">
+    <script src="https://www.googletagmanager.com/gtag/js?id=G-LBEL64K5MW" async=""></script>
+    <script>window.dataLayer = window.dataLayer || []; function gtag() { dataLayer.push(arguments); } gtag('js', new Date()); gtag('config', 'G-LBEL64K5MW');</script>
+    <link rel="modulepreload" as="script" href="/api/_nuxt/entry.ff6a04f8.js">
+    <link rel="preload" as="style" href="/api/_nuxt/entry.dd160a42.css">
+    <link rel="prefetch" as="script" href="/api/_nuxt/default.b10bead0.js">
+    <link rel="prefetch" as="style" href="/api/_nuxt/default.b4fb3257.css">
+    <link rel="prefetch" as="script" href="/api/_nuxt/fetch.d8f2e623.js">
+    <link rel="prefetch" as="script" href="/api/_nuxt/asyncData.6975a30b.js">
+    <link rel="prefetch" as="script" href="/api/_nuxt/error-component.0e02483a.js">
+    <link rel="stylesheet" href="/api/_nuxt/entry.dd160a42.css">
+    <link rel="modulepreload" as="script" href="/api/_nuxt/_id_.4928a4ac.js">
+    <link rel="modulepreload" as="script" href="/api/_nuxt/client-only.42680b60.js">
+    <link rel="modulepreload" as="script" href="/api/_nuxt/composables.c4fa5b96.js">
+    <link rel="stylesheet" href="/api/_nuxt/_id_.40414f45.css">
+    <link rel="stylesheet" href="/api/_nuxt/default.b4fb3257.css">
+    <style type="text/css" id="vuetify-theme-stylesheet">
+        :root {
+            color-scheme: dark;
         }
 
-        th, td {
-            padding: 3;
-            padding-left: 4;
-            padding-right: 4;
-            text-align: center;
-            white-space: nowrap;
+        .v-theme--light {
+            color-scheme: normal;
+            --v-theme-background: 255,255,255;
+            --v-theme-background-overlay-multiplier: 1;
+            --v-theme-surface: 255,251,254;
+            --v-theme-surface-overlay-multiplier: 1;
+            --v-theme-surface-variant: 66,66,66;
+            --v-theme-surface-variant-overlay-multiplier: 2;
+            --v-theme-on-surface-variant: 238,238,238;
+            --v-theme-primary: 103,80,164;
+            --v-theme-primary-overlay-multiplier: 2;
+            --v-theme-primary-darken-1: 55,0,179;
+            --v-theme-primary-darken-1-overlay-multiplier: 2;
+            --v-theme-secondary: 180,176,187;
+            --v-theme-secondary-overlay-multiplier: 1;
+            --v-theme-secondary-darken-1: 1,135,134;
+            --v-theme-secondary-darken-1-overlay-multiplier: 1;
+            --v-theme-error: 179,38,30;
+            --v-theme-error-overlay-multiplier: 2;
+            --v-theme-info: 33,150,243;
+            --v-theme-info-overlay-multiplier: 1;
+            --v-theme-success: 76,175,80;
+            --v-theme-success-overlay-multiplier: 1;
+            --v-theme-warning: 251,140,0;
+            --v-theme-warning-overlay-multiplier: 1;
+            --v-theme-tertiary: 125,82,96;
+            --v-theme-tertiary-overlay-multiplier: 2;
+            --v-theme-on-background: 0,0,0;
+            --v-theme-on-surface: 0,0,0;
+            --v-theme-on-primary: 255,255,255;
+            --v-theme-on-primary-darken-1: 255,255,255;
+            --v-theme-on-secondary: 0,0,0;
+            --v-theme-on-secondary-darken-1: 255,255,255;
+            --v-theme-on-error: 255,255,255;
+            --v-theme-on-info: 255,255,255;
+            --v-theme-on-success: 255,255,255;
+            --v-theme-on-warning: 255,255,255;
+            --v-theme-on-tertiary: 255,255,255;
+            --v-border-color: 0, 0, 0;
+            --v-border-opacity: 0.12;
+            --v-high-emphasis-opacity: 0.87;
+            --v-medium-emphasis-opacity: 0.6;
+            --v-disabled-opacity: 0.38;
+            --v-idle-opacity: 0.04;
+            --v-hover-opacity: 0.04;
+            --v-focus-opacity: 0.12;
+            --v-selected-opacity: 0.08;
+            --v-activated-opacity: 0.12;
+            --v-pressed-opacity: 0.12;
+            --v-dragged-opacity: 0.08;
+            --v-theme-kbd: 33, 37, 41;
+            --v-theme-on-kbd: 255, 255, 255;
+            --v-theme-code: 245, 245, 245;
+            --v-theme-on-code: 0, 0, 0;
         }
 
-        .PokemonCardPage img:hover {
-            transform: translateY(-7px);
-            -webkit-mask: linear-gradient(-70deg,#000 40%,#0005,#000 60%) right/300%;
-            animation: shimmer 0.8s;
+        .v-theme--dark {
+            color-scheme: dark;
+            --v-theme-background: 18,18,18;
+            --v-theme-background-overlay-multiplier: 1;
+            --v-theme-surface: 33,33,33;
+            --v-theme-surface-overlay-multiplier: 1;
+            --v-theme-surface-variant: 189,189,189;
+            --v-theme-surface-variant-overlay-multiplier: 2;
+            --v-theme-on-surface-variant: 66,66,66;
+            --v-theme-primary: 255,215,64;
+            --v-theme-primary-overlay-multiplier: 2;
+            --v-theme-primary-darken-1: 55,0,179;
+            --v-theme-primary-darken-1-overlay-multiplier: 1;
+            --v-theme-secondary: 255,193,7;
+            --v-theme-secondary-overlay-multiplier: 2;
+            --v-theme-secondary-darken-1: 3,218,197;
+            --v-theme-secondary-darken-1-overlay-multiplier: 2;
+            --v-theme-error: 244,67,54;
+            --v-theme-error-overlay-multiplier: 2;
+            --v-theme-info: 33,150,243;
+            --v-theme-info-overlay-multiplier: 2;
+            --v-theme-success: 76,175,80;
+            --v-theme-success-overlay-multiplier: 2;
+            --v-theme-warning: 251,140,0;
+            --v-theme-warning-overlay-multiplier: 2;
+            --v-theme-primary-darken: 255,196,0;
+            --v-theme-primary-darken-overlay-multiplier: 2;
+            --v-theme-on-background: 255,255,255;
+            --v-theme-on-surface: 255,255,255;
+            --v-theme-on-primary: 0,0,0;
+            --v-theme-on-primary-darken-1: 255,255,255;
+            --v-theme-on-secondary: 0,0,0;
+            --v-theme-on-secondary-darken-1: 0,0,0;
+            --v-theme-on-error: 255,255,255;
+            --v-theme-on-info: 255,255,255;
+            --v-theme-on-success: 255,255,255;
+            --v-theme-on-warning: 255,255,255;
+            --v-theme-on-primary-darken: 0,0,0;
+            --v-border-color: 255, 255, 255;
+            --v-border-opacity: 0.12;
+            --v-high-emphasis-opacity: 0.87;
+            --v-medium-emphasis-opacity: 0.6;
+            --v-disabled-opacity: 0.38;
+            --v-idle-opacity: 0.1;
+            --v-hover-opacity: 0.04;
+            --v-focus-opacity: 0.12;
+            --v-selected-opacity: 0.08;
+            --v-activated-opacity: 0.12;
+            --v-pressed-opacity: 0.16;
+            --v-dragged-opacity: 0.08;
+            --v-theme-kbd: 33, 37, 41;
+            --v-theme-on-kbd: 255, 255, 255;
+            --v-theme-code: 52, 52, 52;
+            --v-theme-on-code: 204, 204, 204;
         }
 
-        @keyframes shimmer {
-            100% {
-                -webkit-mask-position: left
-            }
+        .bg-background {
+            --v-theme-overlay-multiplier: var(--v-theme-background-overlay-multiplier);
+            background: rgb(var(--v-theme-background)) !important;
+            color: rgb(var(--v-theme-on-background)) !important;
         }
 
-        .Boxdesign h3 {
-            font-family: "Inter";
-            position: relative;
-            top: -25px;
-            margin-bottom: -20px;
-            background-color: white;
-            width: fit-content;
-            height: fit-content;
+        .bg-surface {
+            --v-theme-overlay-multiplier: var(--v-theme-surface-overlay-multiplier);
+            background: rgb(var(--v-theme-surface)) !important;
+            color: rgb(var(--v-theme-on-surface)) !important;
         }
 
-        h3, h4 {
-            margin: 2;
+        .bg-surface-variant {
+            --v-theme-overlay-multiplier: var(--v-theme-surface-variant-overlay-multiplier);
+            background: rgb(var(--v-theme-surface-variant)) !important;
+            color: rgb(var(--v-theme-on-surface-variant)) !important;
         }
 
-        h1 {
-            margin: 10;
+        .bg-primary {
+            --v-theme-overlay-multiplier: var(--v-theme-primary-overlay-multiplier);
+            background: rgb(var(--v-theme-primary)) !important;
+            color: rgb(var(--v-theme-on-primary)) !important;
         }
 
-        ul {
-            margin: 0;
+        .bg-primary-darken-1 {
+            --v-theme-overlay-multiplier: var(--v-theme-primary-darken-1-overlay-multiplier);
+            background: rgb(var(--v-theme-primary-darken-1)) !important;
+            color: rgb(var(--v-theme-on-primary-darken-1)) !important;
         }
 
-        #SelectedCard {
-            transform: translateY(13px) translateX(8px);
-            position: fixed;
-            z-index: 1;
-            width: 175px;
-            height: 250px;
-            visibility: hidden;
-            border: 0.3px solid;
-            border-radius: 7px;
-            box-shadow: -0.5px -0.5px 4px 3px forestgreen, 0.5px 0.5px 4px 3px forestgreen;
-            border-color: forestgreen;
+        .bg-secondary {
+            --v-theme-overlay-multiplier: var(--v-theme-secondary-overlay-multiplier);
+            background: rgb(var(--v-theme-secondary)) !important;
+            color: rgb(var(--v-theme-on-secondary)) !important;
         }
 
-        .PokemonCardCell {
-            width: 179px;
-            height: 250px;
+        .bg-secondary-darken-1 {
+            --v-theme-overlay-multiplier: var(--v-theme-secondary-darken-1-overlay-multiplier);
+            background: rgb(var(--v-theme-secondary-darken-1)) !important;
+            color: rgb(var(--v-theme-on-secondary-darken-1)) !important;
         }
 
-        .PokemonCardPage, .PokemonCardPageBlank {
-            padding-top: 5px;
-            padding-left: 5px;
-            padding-right: 5px;
-            float: left;
+        .bg-error {
+            --v-theme-overlay-multiplier: var(--v-theme-error-overlay-multiplier);
+            background: rgb(var(--v-theme-error)) !important;
+            color: rgb(var(--v-theme-on-error)) !important;
         }
 
-        .PokemonCardPageBlank > table {
-            border: 4px solid black;
+        .bg-info {
+            --v-theme-overlay-multiplier: var(--v-theme-info-overlay-multiplier);
+            background: rgb(var(--v-theme-info)) !important;
+            color: rgb(var(--v-theme-on-info)) !important;
         }
 
-        .PokemonCardPage > table {
-            border: 4px solid black;
+        .bg-success {
+            --v-theme-overlay-multiplier: var(--v-theme-success-overlay-multiplier);
+            background: rgb(var(--v-theme-success)) !important;
+            color: rgb(var(--v-theme-on-success)) !important;
         }
 
-        .Boxdesign {
-            border: 2px solid #212121;
-            border-radius: 4px;
-            box-shadow: .4rem .4rem 0 rgb(55,55,55);
-            padding: 10px;
-            margin: 10px;
+        .bg-warning {
+            --v-theme-overlay-multiplier: var(--v-theme-warning-overlay-multiplier);
+            background: rgb(var(--v-theme-warning)) !important;
+            color: rgb(var(--v-theme-on-warning)) !important;
         }
 
-        .buttonlayout {
-            display: inline-flex;
-            margin: 7px;
-            border-radius: 4px;
-            border: none;
-            box-shadow: 0 .2rem 0 rgb(230 230 230);
-            font-family: "Inter";
+        .bg-tertiary {
+            --v-theme-overlay-multiplier: var(--v-theme-tertiary-overlay-multiplier);
+            background: rgb(var(--v-theme-tertiary)) !important;
+            color: rgb(var(--v-theme-on-tertiary)) !important;
+        }
+
+        .bg-primary-darken {
+            --v-theme-overlay-multiplier: var(--v-theme-primary-darken-overlay-multiplier);
+            background: rgb(var(--v-theme-primary-darken)) !important;
+            color: rgb(var(--v-theme-on-primary-darken)) !important;
+        }
+
+        .text-background {
+            color: rgb(var(--v-theme-background)) !important;
+        }
+
+        .border-background {
+            --v-border-color: var(--v-theme-background);
+        }
+
+        .text-surface {
+            color: rgb(var(--v-theme-surface)) !important;
+        }
+
+        .border-surface {
+            --v-border-color: var(--v-theme-surface);
+        }
+
+        .text-surface-variant {
+            color: rgb(var(--v-theme-surface-variant)) !important;
+        }
+
+        .border-surface-variant {
+            --v-border-color: var(--v-theme-surface-variant);
+        }
+
+        .on-surface-variant {
+            color: rgb(var(--v-theme-on-surface-variant)) !important;
+        }
+
+        .text-primary {
+            color: rgb(var(--v-theme-primary)) !important;
+        }
+
+        .border-primary {
+            --v-border-color: var(--v-theme-primary);
+        }
+
+        .text-primary-darken-1 {
+            color: rgb(var(--v-theme-primary-darken-1)) !important;
+        }
+
+        .border-primary-darken-1 {
+            --v-border-color: var(--v-theme-primary-darken-1);
+        }
+
+        .text-secondary {
+            color: rgb(var(--v-theme-secondary)) !important;
+        }
+
+        .border-secondary {
+            --v-border-color: var(--v-theme-secondary);
+        }
+
+        .text-secondary-darken-1 {
+            color: rgb(var(--v-theme-secondary-darken-1)) !important;
+        }
+
+        .border-secondary-darken-1 {
+            --v-border-color: var(--v-theme-secondary-darken-1);
+        }
+
+        .text-error {
+            color: rgb(var(--v-theme-error)) !important;
+        }
+
+        .border-error {
+            --v-border-color: var(--v-theme-error);
+        }
+
+        .text-info {
+            color: rgb(var(--v-theme-info)) !important;
+        }
+
+        .border-info {
+            --v-border-color: var(--v-theme-info);
+        }
+
+        .text-success {
+            color: rgb(var(--v-theme-success)) !important;
+        }
+
+        .border-success {
+            --v-border-color: var(--v-theme-success);
+        }
+
+        .text-warning {
+            color: rgb(var(--v-theme-warning)) !important;
+        }
+
+        .border-warning {
+            --v-border-color: var(--v-theme-warning);
+        }
+
+        .text-tertiary {
+            color: rgb(var(--v-theme-tertiary)) !important;
+        }
+
+        .border-tertiary {
+            --v-border-color: var(--v-theme-tertiary);
+        }
+
+        .on-background {
+            color: rgb(var(--v-theme-on-background)) !important;
+        }
+
+        .on-surface {
+            color: rgb(var(--v-theme-on-surface)) !important;
+        }
+
+        .on-primary {
+            color: rgb(var(--v-theme-on-primary)) !important;
+        }
+
+        .on-primary-darken-1 {
+            color: rgb(var(--v-theme-on-primary-darken-1)) !important;
+        }
+
+        .on-secondary {
+            color: rgb(var(--v-theme-on-secondary)) !important;
+        }
+
+        .on-secondary-darken-1 {
+            color: rgb(var(--v-theme-on-secondary-darken-1)) !important;
+        }
+
+        .on-error {
+            color: rgb(var(--v-theme-on-error)) !important;
+        }
+
+        .on-info {
+            color: rgb(var(--v-theme-on-info)) !important;
+        }
+
+        .on-success {
+            color: rgb(var(--v-theme-on-success)) !important;
+        }
+
+        .on-warning {
+            color: rgb(var(--v-theme-on-warning)) !important;
+        }
+
+        .on-tertiary {
+            color: rgb(var(--v-theme-on-tertiary)) !important;
+        }
+
+        .text-primary-darken {
+            color: rgb(var(--v-theme-primary-darken)) !important;
+        }
+
+        .border-primary-darken {
+            --v-border-color: var(--v-theme-primary-darken);
+        }
+
+        .on-primary-darken {
+            color: rgb(var(--v-theme-on-primary-darken)) !important;
         }
     </style>
-    <script type="text/javascript" language="javascript">
-        
-    </script>
+    <link rel="modulepreload" as="script" href="/api/_nuxt/index.913a2042.js">
+    <link rel="modulepreload" as="script" href="/api/_nuxt/AnimeItem.24b31499.js">
+    <link rel="stylesheet" href="/api/_nuxt/AnimeItem.6086a292.css">
+    <link rel="modulepreload" as="script" href="/api/_nuxt/index.e83a94da.js">
 </head>
 <body>
-    {{CONTENT GOES HERE}}
+    <div id="__nuxt" data-v-app="">
+        <div class="v-application v-theme--dark v-layout v-layout--full-height v-locale--is-ltr" style="z-index: 1000;">
+            <div class="v-application__wrap">
+                <header class="v-toolbar v-toolbar--flat v-toolbar--density-default elevation-15 v-theme--dark v-app-bar" style="top: 0px; z-index: 1008; transform: translateY(0%); position: fixed; left: 0px; width: calc((100% - 0px) - 0px);">
+                    <!---->
+                    <div class="v-toolbar__content" style="height: 64px;">
+                        <!----><!---->
+                        <button type="button" class="v-btn v-btn--icon v-theme--dark text-primary v-btn--density-default rounded-xl v-btn--size-default v-btn--variant-text v-app-bar-nav-icon">
+                            <span class="v-btn__overlay"></span><span class="v-btn__underlay"></span><!----><span class="v-btn__content" data-no-activator=""><i class="mdi-menu mdi v-icon notranslate v-theme--dark v-icon--size-default" aria-hidden="true"></i></span><!----><!---->
+                        </button>
+                        <div class="v-toolbar-title v-app-bar-title site-brand">
+                            <div class="v-toolbar-title__placeholder">
+                                <!----><a aria-current="page" href="https://www2.kickassanime.ro/" class="router-link-active router-link-exact-active"><img src="https://www2.kickassanime.ro/assets/img/logo3.png"></a><span class="ml-1 text-caption">ALPHA RELEASE</span>
+                            </div>
+                        </div>
+                        <div class="flex-grow-1"></div>
+                    </div>
+                    <!---->
+                </header>
+                <nav class="v-navigation-drawer v-navigation-drawer--left v-navigation-drawer--active v-theme--dark border-none rounded-lg main-nav-bar" app="" style="background-color: rgb(16, 16, 16); left: 0px; z-index: 1006; transform: translateX(0%); position: fixed; height: calc((100% - 64px) - 0px); top: 64px; bottom: 0px; width: 256px;">
+                    <!----><!---->
+                    <div class="v-navigation-drawer__content">
+                        <div class="mb-3"></div>
+                        <div class="v-list v-theme--dark bg-transparent v-list--density-default v-list--one-line" role="listbox">
+                            <a class="v-list-item v-list-item--link v-theme--dark v-list-item--density-default v-list-item--one-line rounded-pill v-list-item--variant-text" href="https://www2.kickassanime.ro/" tabindex="0">
+                                <span class="v-list-item__overlay"></span><span class="v-list-item__underlay"></span>
+                                <div class="v-list-item__prepend">
+                                    <!----><!----><i class="mdi-home mdi v-icon notranslate v-theme--dark v-icon--size-default" aria-hidden="true"></i>
+                                </div>
+                                <div class="v-list-item__content" data-no-activator="">
+                                    <div class="v-list-item-title">Home</div>
+                                    <!----><!---->
+                                </div>
+                                <!---->
+                            </a>
+                            <a class="v-list-item v-list-item--disabled v-theme--dark v-list-item--density-default v-list-item--one-line rounded-pill v-list-item--variant-text" href="https://www2.kickassanime.ro/trending">
+                                <!----><span class="v-list-item__underlay"></span>
+                                <div class="v-list-item__prepend">
+                                    <!----><!----><i class="mdi-fire mdi v-icon notranslate v-theme--dark v-icon--size-default" aria-hidden="true"></i>
+                                </div>
+                                <div class="v-list-item__content" data-no-activator="">
+                                    <div class="v-list-item-title">Trending</div>
+                                    <!----><!---->
+                                </div>
+                                <!---->
+                            </a>
+                            <a class="v-list-item v-list-item--disabled v-theme--dark v-list-item--density-default v-list-item--one-line rounded-pill v-list-item--variant-text" href="https://www2.kickassanime.ro/schedule">
+                                <!----><span class="v-list-item__underlay"></span>
+                                <div class="v-list-item__prepend">
+                                    <!----><!----><i class="mdi-calendar mdi v-icon notranslate v-theme--dark v-icon--size-default" aria-hidden="true"></i>
+                                </div>
+                                <div class="v-list-item__content" data-no-activator="">
+                                    <div class="v-list-item-title">Schedule</div>
+                                    <!----><!---->
+                                </div>
+                                <!---->
+                            </a>
+                            <a class="v-list-item v-list-item--link v-theme--dark v-list-item--density-default v-list-item--one-line rounded-pill v-list-item--variant-text" href="https://www2.kickassanime.ro/anime" tabindex="0">
+                                <span class="v-list-item__overlay"></span><span class="v-list-item__underlay"></span>
+                                <div class="v-list-item__prepend">
+                                    <!----><!----><i class="mdi-movie mdi v-icon notranslate v-theme--dark v-icon--size-default" aria-hidden="true"></i>
+                                </div>
+                                <div class="v-list-item__content" data-no-activator="">
+                                    <div class="v-list-item-title">Anime</div>
+                                    <!----><!---->
+                                </div>
+                                <!---->
+                            </a>
+                            <a class="v-list-item v-list-item--disabled v-theme--dark v-list-item--density-default v-list-item--one-line rounded-pill v-list-item--variant-text" href="https://www2.kickassanime.ro/premieres">
+                                <!----><span class="v-list-item__underlay"></span>
+                                <div class="v-list-item__prepend">
+                                    <!----><!----><i class="mdi-timelapse mdi v-icon notranslate v-theme--dark v-icon--size-default" aria-hidden="true"></i>
+                                </div>
+                                <div class="v-list-item__content" data-no-activator="">
+                                    <div class="v-list-item-title">Premieres</div>
+                                    <!----><!---->
+                                </div>
+                                <!---->
+                            </a>
+                            <a class="v-list-item v-list-item--disabled v-theme--dark v-list-item--density-default v-list-item--one-line rounded-pill v-list-item--variant-text" href="https://www2.kickassanime.ro/recent-added">
+                                <!----><span class="v-list-item__underlay"></span>
+                                <div class="v-list-item__prepend">
+                                    <!----><!----><i class="mdi-alert-decagram mdi v-icon notranslate v-theme--dark v-icon--size-default" aria-hidden="true"></i>
+                                </div>
+                                <div class="v-list-item__content" data-no-activator="">
+                                    <div class="v-list-item-title">Recently Added</div>
+                                    <!----><!---->
+                                </div>
+                                <!---->
+                            </a>
+                            <a class="v-list-item v-list-item--disabled v-theme--dark v-list-item--density-default v-list-item--one-line rounded-pill v-list-item--variant-text" href="https://www2.kickassanime.ro/popular">
+                                <!----><span class="v-list-item__underlay"></span>
+                                <div class="v-list-item__prepend">
+                                    <!----><!----><i class="mdi-crown mdi v-icon notranslate v-theme--dark v-icon--size-default" aria-hidden="true"></i>
+                                </div>
+                                <div class="v-list-item__content" data-no-activator="">
+                                    <div class="v-list-item-title">Popular Shows</div>
+                                    <!----><!---->
+                                </div>
+                                <!---->
+                            </a>
+                        </div>
+                        <hr class="v-divider v-theme--dark px-2" aria-orientation="horizontal" role="separator">
+                        <div class="v-list v-theme--dark bg-transparent v-list--density-default v-list--one-line" role="listbox">
+                            <a class="v-list-item v-list-item--disabled v-theme--dark v-list-item--density-default v-list-item--one-line rounded-pill v-list-item--variant-text" href="https://www2.kickassanime.ro/history">
+                                <!----><span class="v-list-item__underlay"></span>
+                                <div class="v-list-item__prepend">
+                                    <!----><!----><i class="mdi-history mdi v-icon notranslate v-theme--dark v-icon--size-default" aria-hidden="true"></i>
+                                </div>
+                                <div class="v-list-item__content" data-no-activator="">
+                                    <div class="v-list-item-title">History</div>
+                                    <!----><!---->
+                                </div>
+                                <!---->
+                            </a>
+                            <a class="v-list-item v-list-item--disabled v-theme--dark v-list-item--density-default v-list-item--one-line rounded-pill v-list-item--variant-text" href="https://www2.kickassanime.ro/watch-later">
+                                <!----><span class="v-list-item__underlay"></span>
+                                <div class="v-list-item__prepend">
+                                    <!----><!----><i class="mdi-clock-check mdi v-icon notranslate v-theme--dark v-icon--size-default" aria-hidden="true"></i>
+                                </div>
+                                <div class="v-list-item__content" data-no-activator="">
+                                    <div class="v-list-item-title">Watch Later</div>
+                                    <!----><!---->
+                                </div>
+                                <!---->
+                            </a>
+                            <a class="v-list-item v-list-item--disabled v-theme--dark v-list-item--density-default v-list-item--one-line rounded-pill v-list-item--variant-text" href="https://www2.kickassanime.ro/favorites">
+                                <!----><span class="v-list-item__underlay"></span>
+                                <div class="v-list-item__prepend">
+                                    <!----><!----><i class="mdi-heart-plus mdi v-icon notranslate v-theme--dark v-icon--size-default" aria-hidden="true"></i>
+                                </div>
+                                <div class="v-list-item__content" data-no-activator="">
+                                    <div class="v-list-item-title">Favorites</div>
+                                    <!----><!---->
+                                </div>
+                                <!---->
+                            </a>
+                        </div>
+                    </div>
+                    <!---->
+                </nav>
+                <main class="v-main" style="--v-layout-left:256px; --v-layout-right:0px; --v-layout-top:64px; --v-layout-bottom:0px;">
+                    {{CONTENT GOES HERE}}
+                </main>
+            </div>
+        </div>
+    </div>
 </body>
 <footer>
     <script type="text/javascript" language="javascript">
