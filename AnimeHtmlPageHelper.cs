@@ -180,8 +180,28 @@ namespace Pokebook
                     htmlInnerContent += $"<img class='v-img__img v-img__img--cover' src='{thumbnailUrl}' alt='' style=''>";
                     htmlInnerContent += "<div class='v-responsive__content'>";
                     htmlInnerContent += "<span class='v-chip v-theme--dark bg-primary v-chip--density-comfortable rounded-sm v-chip--size-x-small v-chip--variant-elevated font-medium' draggable='false'>";
-                    htmlInnerContent += $"<span class='v-chip__underlay'></span>EP {episode.EpisodeNumber}</span></div></div>";
-                    htmlInnerContent += "<span class='v-card__overlay'></span><span class='v-card__underlay'></span></a></div>";
+                    htmlInnerContent += $"<span class='v-chip__underlay'></span>EP {episode.EpisodeNumber}</span>";
+
+                    if (episode.DateTimeUploaded.HasValue)
+                    {
+                        static string GetTimeDifference(DateTime dtUtc)
+                        {
+                            var timeDiff = DateTime.UtcNow - dtUtc;
+
+                            if (timeDiff.TotalDays > 730) return $"{(int)(timeDiff.TotalDays / 365)} years ago";
+                            if (timeDiff.TotalDays > 60) return $"{(int)(timeDiff.TotalDays / 30)} months ago";
+                            if (timeDiff.TotalDays > 2) return $"{(int)timeDiff.TotalDays} days ago";
+                            if (timeDiff.TotalHours > 2) return $"{(int)timeDiff.TotalHours} hours ago";
+                            if (timeDiff.TotalMinutes > 2) return $"{(int)timeDiff.TotalMinutes} minutes ago";
+                            if (timeDiff.TotalSeconds > 2) return $"{(int)timeDiff.TotalSeconds} seconds ago";
+                            return "Just Now";
+                        }
+
+                        htmlInnerContent += "<span class='v-chip v-theme--dark bg-secondary v-chip--density-comfortable rounded-sm v-chip--size-x-small v-chip--variant-elevated font-medium v-chip-bottom-right' draggable='false'>";
+                        htmlInnerContent += $"<span class='v-chip__underlay'></span>{GetTimeDifference(episode.DateTimeUploaded.Value)}</span>";
+                    }
+
+                    htmlInnerContent += "</div></div><span class='v-card__overlay'></span><span class='v-card__underlay'></span></a></div>";
                 }
                 htmlInnerContent += $"</div></div>";
             }
