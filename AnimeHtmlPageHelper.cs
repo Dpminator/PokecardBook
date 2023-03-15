@@ -138,8 +138,6 @@ namespace Pokebook
 
         public static async Task<string> GetLandingPageHtml(string titleCode)
         {
-            await UpdateAnimeList(false);
-
             var animeTitle = QuerySql($"select Title from Anime where TitleCode = '{titleCode}'").Rows[0].ItemArray[0].ToString();
 
             var animeEpisodes = new List<AnimeEpisodeItem>();
