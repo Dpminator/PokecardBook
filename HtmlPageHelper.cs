@@ -339,6 +339,11 @@ namespace Pokebook
 
                     var link = "https://www.lucasre.com.au" + lines[0].Split("\"")[0];
                     var address = lines[6 + lineOffset];
+                    Console.WriteLine(address);
+                    if (address == "1112/381 Docklands Drive")
+                    {
+                        Console.WriteLine("");
+                    }
                     var suburb = lines[9 + lineOffset];
                     var sqlProperty = sqlProperties.SingleOrDefault(x => x.Address == address && x.Suburb == suburb, null);
                     var newProperty = (sqlProperty == null);
@@ -346,8 +351,13 @@ namespace Pokebook
                     var propertyId = newProperty ? 0 : sqlProperty.PropertyId;
                     var oldMinPrice = 0;
                     var oldMaxPrice = 0;
-                    var minPrice = int.Parse(lines[12+ lineOffset].Split("-")[0].Trim().TrimStart('$').Replace(",", ""));
-                    var maxPrice = lines[12 + lineOffset].Contains("-") ? int.Parse(lines[12+ lineOffset].Split("-")[1].Trim().TrimStart('$').Replace(",", "")) : minPrice;
+                    var minPrice = -1;
+                    var maxPrice = -1;
+                    if (lines[12 + lineOffset] != "Contact Agent")
+                    {
+                        minPrice = int.Parse(lines[12 + lineOffset].Split("-")[0].Trim().TrimStart('$').Replace(",", ""));
+                        maxPrice = lines[12 + lineOffset].Contains("-") ? int.Parse(lines[12 + lineOffset].Split("-")[1].Trim().TrimStart('$').Replace(",", "")) : minPrice;
+                    }
                     var priceChange = (!newProperty && (sqlProperty.MinimumPrice != minPrice || sqlProperty.MaximumPrice != maxPrice));
                     if (priceChange)
                     {

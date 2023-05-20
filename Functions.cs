@@ -156,60 +156,6 @@ namespace Pokebook
             return new ContentResult { Content = output, ContentType = "text/html" };
         }
 
-        [FunctionName("Anime")]
-        public static async Task<ContentResult> Anime([HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "anime/{titleCode}")] HttpRequest req, ExecutionContext exeCon, string titleCode)
-        {
-            await AnimeHelper.SetUpDatabaseTables();
-            var html = await AnimeHelper.GetLandingPageHtml(titleCode);
-
-            return new ContentResult { Content = html, ContentType = "text/html" };
-        }
-
-        [FunctionName("AnimeNuxt")]
-        public static async Task<ActionResult> AnimeNuxt([HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "_nuxt/{fileName}")] HttpRequest req, ExecutionContext exeCon, string fileName)
-        {
-            var fileType = fileName.Split("?")[0].Split(".").Last();
-            var contentType = fileType switch
-            {
-                "js" => "application/javascript",
-                "css" => "text/css; charset=utf-8",
-                "woff" => "font/woff",
-                "woff2" => "font/woff2",
-                "ttf" => "font/ttf",
-                "eot" => "text/html;charset=utf-8",
-                _ => throw new NotImplementedException()
-            };
-
-            if (fileType.Contains("woff") || fileType == "ttf")
-            {
-                var fontResponse = await AnimeHelper.GetNuxtFontResponse(fileName);
-                return new FileContentResult(await (fontResponse).Content.ReadAsByteArrayAsync(), contentType);
-            }
-            else
-            {
-                var content = await AnimeHelper.GetNuxtContent(fileName);
-                return new ContentResult { Content = content, ContentType = contentType };
-            }  
-        }
-
-        [FunctionName("AnimeUpdate")]
-        public static async Task<ContentResult> AnimeUpdate([HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "anime/update")] HttpRequest req, ExecutionContext exeCon)
-        {
-            await AnimeHelper.UpdateAnimeList(true);
-
-            return new ContentResult { Content = "Done", ContentType = "text/html" };
-        }
-
-        [FunctionName("PokemonBook")]
-        public static async Task<ContentResult> ProducePokemonBookHtmlPage(
-            [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "pokemon-book")] HttpRequest req,
-            [Table("PokecardSlot")] CloudTable pokecardSlotTable, [Table("PokecardBook")] CloudTable pokecardBookTable)
-        {
-            var htmlHelper = new PokemonBookPage(pokecardSlotTable, pokecardBookTable, req.Query["book"].ToString());
-            var pageContent = await htmlHelper.GetHtml();
-            return new ContentResult { Content = pageContent, ContentType = "text/html" };
-        }
-
         [FunctionName("UpdateBook")]
         public static async Task<ContentResult> UpdateBook(
            [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "update-book")] HttpRequest req, ExecutionContext exeCon,
