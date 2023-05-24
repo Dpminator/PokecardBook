@@ -156,6 +156,16 @@ namespace Pokebook
             return new ContentResult { Content = output, ContentType = "text/html" };
         }
 
+        [FunctionName("PokemonBook")]
+        public static async Task<ContentResult> ProducePokemonBookHtmlPage(
+            [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "pokemon-book")] HttpRequest req,
+            [Table("PokecardSlot")] CloudTable pokecardSlotTable, [Table("PokecardBook")] CloudTable pokecardBookTable)
+        {
+            var htmlHelper = new PokemonBookPage(pokecardSlotTable, pokecardBookTable, req.Query["book"].ToString());
+            var pageContent = await htmlHelper.GetHtml();
+            return new ContentResult { Content = pageContent, ContentType = "text/html" };
+        }
+
         [FunctionName("UpdateBook")]
         public static async Task<ContentResult> UpdateBook(
            [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "update-book")] HttpRequest req, ExecutionContext exeCon,
