@@ -339,11 +339,6 @@ namespace Pokebook
 
                     var link = "https://www.lucasre.com.au" + lines[0].Split("\"")[0];
                     var address = lines[6 + lineOffset];
-                    Console.WriteLine(address);
-                    if (address == "1112/381 Docklands Drive")
-                    {
-                        Console.WriteLine("");
-                    }
                     var suburb = lines[9 + lineOffset];
                     var sqlProperty = sqlProperties.SingleOrDefault(x => x.Address == address && x.Suburb == suburb, null);
                     var newProperty = (sqlProperty == null);
