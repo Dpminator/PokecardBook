@@ -1,0 +1,141 @@
+﻿<html>
+<head>
+    <title>Pay Increase Checker</title>
+    <style>
+        table, th, tr, td {
+            border: 1px solid black;
+        }
+
+        th, td {
+            padding: 4px;
+            text-align: center;
+            white-space: nowrap;
+        }
+    </style>
+    <script type="text/javascript" language="javascript">
+        function calculatePay(yearlyWage, hecs)
+        {
+            var medicareTax = yearlyWage * 0.02;
+            var incomeTax = 0.0;
+            if (yearlyWage > 180000) incomeTax = 51667 + 0.45 * (yearlyWage - 180000);
+            else if (yearlyWage > 120000) incomeTax = 29467 + 0.37 * (yearlyWage - 120000);
+            else if (yearlyWage > 45000) incomeTax = 5092 + 0.325 * (yearlyWage - 45000);
+            else if (yearlyWage > 18000) incomeTax = 0.19 * (yearlyWage - 18000);
+
+            var yearlyHecs = 0.0;
+            if (hecs) {
+                var hecsRepaymentPercent = 0.0;
+                if (yearlyWage > 141848) hecsRepaymentPercent = 0.1;
+                else if (yearlyWage > 133819) hecsRepaymentPercent = 0.095;
+                else if (yearlyWage > 126244) hecsRepaymentPercent = 0.09;
+                else if (yearlyWage > 119098) hecsRepaymentPercent = 0.085;
+                else if (yearlyWage > 112356) hecsRepaymentPercent = 0.08;
+                else if (yearlyWage > 105997) hecsRepaymentPercent = 0.075;
+                else if (yearlyWage > 99997) hecsRepaymentPercent = 0.07;
+                else if (yearlyWage > 94337) hecsRepaymentPercent = 0.065;
+                else if (yearlyWage > 88997) hecsRepaymentPercent = 0.06;
+                else if (yearlyWage > 83959) hecsRepaymentPercent = 0.055;
+                else if (yearlyWage > 79207) hecsRepaymentPercent = 0.05;
+                else if (yearlyWage > 74723) hecsRepaymentPercent = 0.045;
+                else if (yearlyWage > 70493) hecsRepaymentPercent = 0.04;
+                else if (yearlyWage > 66503) hecsRepaymentPercent = 0.035;
+                else if (yearlyWage > 62739) hecsRepaymentPercent = 0.03;
+                else if (yearlyWage > 59187) hecsRepaymentPercent = 0.025;
+                else if (yearlyWage > 55837) hecsRepaymentPercent = 0.02;
+                else if (yearlyWage > 48361) hecsRepaymentPercent = 0.01;
+
+                yearlyHecs = hecsRepaymentPercent * yearlyWage;
+            }
+
+
+            var yearlyTax = medicareTax + incomeTax + yearlyHecs;
+            var monthlyPretaxIncome = Math.ceil(yearlyWage / 12);
+            var weeklyPretaxIncome = (monthlyPretaxIncome / (13 / 3.0)).toFixed(2);
+            var monthlyTax = yearlyTax / 12.0;
+            var weeklyTax = yearlyTax / 52.0;
+
+            var yearlyPay = Math.round(yearlyWage - yearlyTax);
+            var monthlyPaycheck = Math.round(monthlyPretaxIncome - monthlyTax);
+            var roughWeeklyPay = Math.round(weeklyPretaxIncome - weeklyTax);
+
+            return { yearly: yearlyPay, monthly: monthlyPaycheck, weekly: roughWeeklyPay };
+        }
+
+
+        function UpdateTable()
+        {
+            var yearlyWage = parseInt(document.getElementById("AnnualWageInput").value)
+            var hecs = document.getElementById("HelpDebtInput").checked
+
+            var oldPay = calculatePay(yearlyWage, hecs);
+
+            var tableContainer = document.getElementById("mainTableDiv");
+            if (tableContainer.firstChild) tableContainer.removeChild(tableContainer.firstChild);
+
+            var table = document.createElement("table");
+
+            var row1 = table.insertRow();
+            var cell11 = row1.insertCell(); cell11.style = "border:0px;";
+            var cell12 = row1.insertCell(); cell12.style = "border:0px;";
+            var cell13 = row1.insertCell(); cell13.textContent = "Monthly";
+            var cell14 = row1.insertCell(); cell14.textContent = "Weekly";
+            var cell15 = row1.insertCell(); cell15.textContent = "Annually";
+            var cell16 = row1.insertCell(); cell16.textContent = "Net Increase";
+
+            var row2 = table.insertRow();
+            var cell21 = row2.insertCell(); cell21.textContent = "$" + yearlyWage.toLocaleString();
+            var cell22 = row2.insertCell(); cell22.style = "border:0px;"
+            var cell23 = row2.insertCell(); cell23.textContent = "$" + oldPay.monthly.toLocaleString();
+            var cell24 = row2.insertCell(); cell24.textContent = "$" + oldPay.weekly.toLocaleString();
+            var cell25 = row2.insertCell(); cell25.textContent = "$" + oldPay.yearly.toLocaleString();
+            var cell26 = row2.insertCell(); cell26.style = "border:0px;";
+
+            var row3 = table.insertRow(); row3.style = "height:10;";
+
+            for (let k = Math.ceil((yearlyWage + 1) / 1000.0); k <= Math.ceil(yearlyWage * 1.5 / 1000.0); k++) {
+                var newPay = calculatePay(k * 1000, hecs);
+                var netIncreasePercent = (((newPay.monthly / oldPay.monthly) - 1) * 100).toFixed(2);
+                var row = table.insertRow();
+                var cell1 = row.insertCell(); cell1.textContent = k + " K";
+                var cell2 = row.insertCell(); cell2.style = "border:0px;"
+                var cell3 = row.insertCell(); cell3.textContent = "$" + newPay.monthly.toLocaleString() + " (+ $" + (newPay.monthly - oldPay.monthly).toLocaleString() + ")";
+                var cell4 = row.insertCell(); cell4.textContent = "$" + newPay.weekly.toLocaleString() + " (+ $" + (newPay.weekly - oldPay.weekly).toLocaleString() + ")";
+                var cell5 = row.insertCell(); cell5.textContent = "$" + newPay.yearly.toLocaleString() + " (+ $" + (newPay.yearly - oldPay.yearly).toLocaleString() + ")";
+                var cell6 = row.insertCell(); cell6.textContent = netIncreasePercent + "%";
+            }
+            tableContainer.appendChild(table);
+
+            while (tableContainer.childNodes.length > 1) tableContainer.removeChild(tableContainer.lastChild);
+        }
+    </script>
+</head>
+<body>
+    What is your Annual Wage? <input id="AnnualWageInput" onkeyup="UpdateTable()" onchange="UpdateTable()" type="number" min="40000" max="500000" value="70000" step="1000"><br>
+    Do you have a HECS/HELP debt? <input id="HelpDebtInput" onchange="UpdateTable()" type="checkbox"><br><br>
+
+    As of 2023, the average Full Time Australian worker's salary is <b>$70,000</b><br>
+    On June 1st 2023, Australia's minimum wage increased by <b>5.75%</b><br>
+    On June 1st 2023, the HELP debt indexation was <b>7.10%</b><br>
+    If your <b>net</b> pay increase is less than 7%, you are effectively getting a pay <b>decrease</b>!<br><br>
+
+    <div id="mainTableDiv"></div><br><br><br><br>
+
+    <b>Assumptions:</b><br>
+    You work full time<br>
+    Your Superannuation is not included in your salary<br>
+    You have private healthcare<br>
+    You do not have a medicare exemption<br>
+    This is your only form of taxable income<br><br>
+    If any of these are not true, please use <a href="https://paycalculator.com.au">https://paycalculator.com.au</a> for more accurate numbers<br><br><br>
+
+    <b>Other Notes:</b><br>
+    All calculations/numbers are estimations and may not exactly reflect actual earnings<br>
+    HELP debt tax percentages are based off the financial year of 2022-2023 (Yes, this changes yearly)<br>
+    I got the Full Time Average Salary from this website: <a href='https://au.talent.com/salary?job=full+time'>https://au.talent.com/salary?job=full+time</a><br>
+    I got the 2023 minimum wage increase from <a href='https://www.theguardian.com/australia-news/2023/jun/02/minimum-wage-rise-award-australia-lowest-paid-workers-5-75-per-cent-increase-wages-from-july-1'>The Guardian Asutralia</a><br>
+    I got the 2023 HELP Debt Indexation from this website:<a href='https://atotaxcalculator.com.au/hecs-debt-indexation'>https://atotaxcalculator.com.au/hecs-debt-indexation</a><br>
+    I got the 2022-2023 HELP debt repayment percentages from <a href='https://atotaxcalculator.com.au/help-debt'>that same website</a><br>
+
+    <script type="text/javascript" language="javascript">UpdateTable()</script>
+</body>
+</html>

@@ -7,6 +7,8 @@ using System.Net.Http;
 using Microsoft.Azure.Cosmos.Table;
 using System.Linq;
 using System;
+using Microsoft.AspNetCore.Mvc.Internal;
+using System.IO;
 
 namespace Pokebook
 {
@@ -67,6 +69,14 @@ namespace Pokebook
         {
             var results = await LucasHelper.UpdateLucasProperties();
             return new OkObjectResult(results == "" ? "No changes" : results);
+        }
+
+        [FunctionName("PayRiseExaminer")]
+        public static async Task<ContentResult> PayRiseExaminer([HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "paychecker")] HttpRequest req, ExecutionContext exeCon)
+        {
+            var htmlFile = "payIncreaseChecker.html";
+            var htmlText = File.ReadAllText(File.Exists(htmlFile) ? htmlFile : $"C:/home/site/wwwroot/{htmlFile}");
+            return new ContentResult { Content = htmlText, ContentType = "text/html" };
         }
 
         [FunctionName("MortgageCalculator")]
