@@ -393,7 +393,7 @@ namespace Pokebook
                     var status = "Active";
                     if (lucasHtml2.Contains("<div class='main-badge large'>"))
                     {
-                        status = $"Badge:{lucasHtml2.Split("<div class='main-badge large'>")[1].Split("</div>")[0].Trim()}";
+                        status = $"Badge:{lucasHtml2.Split("<div class='main-badge large'><span>")[1].Split("</span></div>")[0].Trim()}";
                     }else if (sizeMetresSquared == 0 || councilRates == 0 || waterRates == 0 || strataFees == 0)
                     {
                         var missingInfoText = "";
